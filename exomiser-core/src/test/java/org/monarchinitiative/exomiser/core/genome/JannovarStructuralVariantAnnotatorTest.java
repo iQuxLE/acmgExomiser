@@ -55,10 +55,15 @@ class JannovarStructuralVariantAnnotatorTest {
         List<VariantAnnotation> annotations = instance.annotate(variantCoordinates);
         assertThat(annotations.size(), equalTo(1));
         VariantAnnotation variantAnnotation = annotations.get(0);
+        System.out.println(variantAnnotation);
+
         assertThat(variantAnnotation.hasTranscriptAnnotations(), is(true));
         assertThat(variantAnnotation.getGeneSymbol(), equalTo("FGFR2"));
         assertThat(variantAnnotation.getGeneId(), equalTo("2263"));
+
+        System.out.println(variantAnnotation.getClass());
         assertThat(variantAnnotation.getVariantEffect(), equalTo(VariantEffect.TRANSCRIPT_ABLATION));
+        System.out.println(variantAnnotation.getTranscriptAnnotations());
     }
 
     private GenomicVariant variant(Contig contig, int start, int end, String ref, String alt, int changeLength) {

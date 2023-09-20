@@ -75,7 +75,7 @@ public abstract class GenomeAnalysisServiceConfigurer implements GenomeAnalysisS
     //This method is calling the public interface of the concrete implementation so that the caching works on the DAOs
     protected VariantDataService buildVariantDataService() {
         AllelePropertiesDaoAdapter allelePropertiesDaoAdapter = new AllelePropertiesDaoAdapter(allelePropertiesDao());
-        ClinVarDao clinVarDao = new ClinVarDaoMvStore(clinVarMvStore);
+        ClinVarDao clinVarDao = new ClinVarDaoMvStore(clinVarMvStore, genomeProperties.getAssembly());
         return VariantDataServiceImpl.builder()
                 .variantWhiteList(variantWhiteList())
                 .clinVarDao(clinVarDao)

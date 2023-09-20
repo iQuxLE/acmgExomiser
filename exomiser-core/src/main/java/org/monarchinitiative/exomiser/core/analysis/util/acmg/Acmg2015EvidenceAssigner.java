@@ -20,24 +20,40 @@
 
 package org.monarchinitiative.exomiser.core.analysis.util.acmg;
 
+import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Var;
 import de.charite.compbio.jannovar.annotation.VariantEffect;
+import de.charite.compbio.jannovar.annotation.builders.StructuralVariantAnnotationBuilder;
+import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
+import de.charite.compbio.jannovar.reference.HG19RefDictBuilder;
+import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.h2.mvstore.MVMap;
+import org.h2.mvstore.MVStore;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraint;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraints;
 import org.monarchinitiative.exomiser.core.analysis.util.InheritanceModeAnalyser;
-import org.monarchinitiative.exomiser.core.model.Pedigree;
+import org.monarchinitiative.exomiser.core.genome.*;
+import org.monarchinitiative.exomiser.core.genome.dao.AllelePropertiesDao;
+import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
+import org.monarchinitiative.exomiser.core.genome.dao.serialisers.ClinVarDataType;
+import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
+import org.monarchinitiative.exomiser.core.genome.dao.serialisers.VariantStoreDao;
+import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual;
-import org.monarchinitiative.exomiser.core.model.SampleGenotype;
-import org.monarchinitiative.exomiser.core.model.TranscriptAnnotation;
-import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.*;
 import org.monarchinitiative.exomiser.core.phenotype.ModelPhenotypeMatch;
 import org.monarchinitiative.exomiser.core.prioritisers.model.Disease;
+import org.monarchinitiative.exomiser.core.proto.AlleleProto;
+import org.monarchinitiative.exomiser.core.proto.ProtoConverter;
+import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.util.VariantTrimmer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.*;
@@ -47,9 +63,15 @@ import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriteri
  */
 public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
+    private static final Logger logger = LoggerFactory.getLogger(Acmg2015EvidenceAssigner.class);
+
     private final String probandId;
     private final Individual.Sex probandSex;
     private final Pedigree pedigree;
+
+    private VariantDataService variantDataService;
+    private VariantAnnotator variantAnnotator;
+
 
     public Acmg2015EvidenceAssigner(String probandId, Pedigree pedigree) {
         this.probandId = Objects.requireNonNull(probandId);
@@ -59,6 +81,18 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             throw new IllegalArgumentException("Proband '" + probandId + "' not found in pedigree " + pedigree);
         }
         this.probandSex = proband.getSex();
+    }
+
+    public Acmg2015EvidenceAssigner(String probandId, Pedigree pedigree, VariantAnnotator variantAnnotator, VariantDataService variantDataService) {
+        this.probandId = Objects.requireNonNull(probandId);
+        this.pedigree = pedigree == null || pedigree.isEmpty() ? Pedigree.justProband(probandId) : pedigree;
+        Individual proband = this.pedigree.getIndividualById(probandId);
+        if (proband == null) {
+            throw new IllegalArgumentException("Proband '" + probandId + "' not found in pedigree " + pedigree);
+        }
+        this.probandSex = proband.getSex();
+        this.variantAnnotator = variantAnnotator;
+        this.variantDataService = variantDataService;
     }
 
     /**
@@ -85,6 +119,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             return AcmgEvidence.empty();
         }
 
+//        TranscriptModel transcriptModel = new TranscriptModel(variantEvaluation.getTranscriptAnnotations().get(0).getAccession(), variantEvaluation.getGeneSymbol(), )
+
         AcmgEvidence.Builder acmgEvidenceBuilder = AcmgEvidence.builder();
 
         boolean hasCompatibleDiseaseMatches = !compatibleDiseaseMatches.isEmpty();
@@ -94,7 +130,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
         // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
         // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
-//        assignPS1(acmgEvidenceBuilder, variantEvaluation.getVariantEffect(), variantEvaluation.getPathogenicityData().getClinVarData());
+        assignPS1(acmgEvidenceBuilder, variantEvaluation);
 
         if (pedigree.containsId(probandId)) {
             Individual proband = pedigree.getIndividualById(probandId);
@@ -171,6 +207,9 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         ) {
             if (variantEvaluation.hasTranscriptAnnotations()) {
                 TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
+                System.out.println(transcriptAnnotation);
+                System.out.println(transcriptAnnotation.getHgvsProtein());
+
                 if (predictedToLeadToNmd(transcriptAnnotation)) {
                     acmgEvidenceBuilder.add(PVS1);
                 } else {
@@ -221,35 +260,58 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                 || variantEffect == VariantEffect.EXON_LOSS_VARIANT;
     }
 
-//    private void assignPS1(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
-//        // find same AA change as other P/LP or B/LB MISSENSE variant
-//        TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
-//        if (variantEvaluation.hasTranscriptAnnotations() && transcriptAnnotation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT) {
-//            // find clinvar variants 2 bases up/downstream
-//            int min = variantEvaluation.start() - 2;
-//            int max = variantEvaluation.start() + 2;
-//            // 123 | 123 | 123
-//            // ... | .A. | ...
-//            //  22 | 23  | 24
-//            // NEED mvStoreDao and logic to do range query on this.
-////            Map<AlleleKey, PathogenicityData> pathogenicityData = mvStoreDao.getPathogenicityDataForRange(chr, min, max);
-//                // 1-2345-A-T
-//            // iterate through entrySet, if there is a ClinVarData && primaryIntepretation is P/LP
-//            // IGNORE same variant, if present
-//            ClinVarData clinVarData = ClinVarData.empty(); // get this from the PathogenicityData
-//            ClinVarData.ClinSig primaryInterpretation = clinVarData.getPrimaryInterpretation();
-//            if (primaryInterpretation == ClinVarData.ClinSig.PATHOGENIC || primaryInterpretation == ClinVarData.ClinSig.PATHOGENIC_OR_LIKELY_PATHOGENIC || primaryInterpretation == ClinVarData.ClinSig.LIKELY_PATHOGENIC) {
-//                // use Jannovar to generate the AA change for this variant using the VariantAnnotator.
-//                // NEED VarantAnnotator
-//                // Create a VariantEvaluation from AlleleKey
-//                // Annotate (can do this against same transcript as above?) (then also need JannovarData to get transcript by accession)
-//                // (p.Arg23Ala) = (p.Lys22Tyr)
-//                if (transcriptAnnotation.getHgvsProtein().equals(clinvarAnnotation.getHgvsProtein())) {
-//                    acmgEvidenceBuilder.add(PS1);
-//                } PM5
-//            }
-//        }
-//    }
+    public void assignPS1(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
+    // find same AA change as other P/LP or B/LB MISSENSE variant
+    String proteinChangeFromInput = variantEvaluation.getTranscriptAnnotations().get(0).getHgvsProtein();
+    String cdnaChangeFromInput = variantEvaluation.getTranscriptAnnotations().get(0).getHgvsCdna();
+    logger.info("Input: " + variantEvaluation.getTranscriptAnnotations().get(0).getVariantEffect());
+    logger.info("Input: " + variantAnnotator.annotate(variantEvaluation));
+    if (variantEvaluation.hasTranscriptAnnotations() && variantEvaluation.getTranscriptAnnotations().get(0).getVariantEffect() == VariantEffect.MISSENSE_VARIANT) {
+        Map<GenomicVariant, ClinVarData> cvData = variantDataService.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        logger.info("" + cvData);
+
+        for (Map.Entry<GenomicVariant, ClinVarData> entry : cvData.entrySet()) {
+
+            ClinVarData.ClinSig clinicalSignificance = entry.getValue().getPrimaryInterpretation();
+            String alt = entry.getKey().alt();
+            String ref = entry.getKey().ref();
+            int chr = entry.getKey().contigId();
+            int pos = entry.getKey().start();
+
+            List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(VariantEvaluation.builder()
+                    .variant(GenomeAssembly.HG19.getContigById(chr), Strand.POSITIVE, Coordinates.oneBased(pos, pos), alt, ref)
+                    .build());
+
+            if (!annotatedVariantList.isEmpty()) {
+
+                VariantAnnotation variantAnnotation = annotatedVariantList.get(0);
+                logger.info("jh" + variantAnnotation);
+
+                if (variantAnnotation.hasTranscriptAnnotations()) {
+                    VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
+                    logger.info("Proto: " + variantEffectFromVariantStore);
+                    String proteinChangeFromProto = variantAnnotation.getTranscriptAnnotations().get(0).getHgvsProtein();
+                    TranscriptAnnotation transcriptAnnotationFromEntriesInRange = variantAnnotation.getTranscriptAnnotations().get(0);
+                    String cdnaChangeFromProto = transcriptAnnotationFromEntriesInRange.getHgvsCdna();
+
+                    logger.info("protoVariantChanges  " + proteinChangeFromProto+ " " + cdnaChangeFromProto);
+                    logger.info("inputVariantChanges  " + proteinChangeFromInput+ " " + cdnaChangeFromInput);
+
+                    if (clinicalSignificance != null
+                        && clinicalSignificance == ClinVarData.ClinSig.PATHOGENIC
+                        || clinicalSignificance == ClinVarData.ClinSig.PATHOGENIC_OR_LIKELY_PATHOGENIC
+                        || clinicalSignificance == ClinVarData.ClinSig.LIKELY_PATHOGENIC
+                        && proteinChangeFromInput.equals(proteinChangeFromProto)
+                        && !cdnaChangeFromInput.equals(cdnaChangeFromProto)
+                        && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT){
+                        acmgEvidenceBuilder.add(PS1);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
     /**
      * PM3 "For recessive disorders, detected in trans with a pathogenic variant"
@@ -588,5 +650,178 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             }
         }
     }
+//
+//    public void createProteinChangeMap() {
+//        proteinChangeMap = new HashMap<>();
+//        for (ClinVarData cvd : clinvarData) {
+//            String proteinChange = cvd.getProteinChange();
+//            if (proteinChange != null && !proteinChange.isEmpty()) {
+//                if (proteinChangeMap.containsKey(proteinChange)) {
+//                    proteinChangeMap.get(proteinChange).add(cvd);
+//                } else {
+//                    List<ClinVarData> dataList = new ArrayList<>();
+//                    dataList.add(cvd);
+//                    proteinChangeMap.put(proteinChange, dataList);
+//                }
+//            }
+//        }
+//    }
+//
+    //PM5  just check all transcriptannotations from PM5
 
+//    public void assignPM5real(VariantEvaluation variantEvaluation, MVStore mvStore){
+//
+//        List<TranscriptAnnotation> transcriptAnnotation = variantEvaluation.getTranscriptAnnotations();
+////        for (transcriptAnnotation : transcriptannotations)
+//            if (variantEvaluation.hasTranscriptAnnotations() && transcriptAnnotation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT) {
+//                logger.info("VariantEvaluation hasTranscriptAnnotation and is MISSENSE_VARIANT");
+//                VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
+//                System.out.println(variantStoreDao);
+//                logger.info("assign PS1 goes to find entriesInRange");
+//
+//                Map<AlleleProto.AlleleKey, AlleleProto.ClinVar> cvData = variantStoreDao.findEntriesInRange(variantEvaluation);
+//                // 1-2345-A-T
+//                System.out.println("cvData: " + cvData);
+//                logger.info("Iterating through entrySet");
+//
+//                // iterate through entrySet, if there is a ClinVarData && primaryIntepretation is P/LP
+//                for (Map.Entry<AlleleProto.AlleleKey, AlleleProto.ClinVar> entry : cvData.entrySet()) {
+//                    System.out.println("log 4" + "\n");
+//                    logger.info(" in entrySet" + "\n");
+//
+//                    AlleleProto.AlleleKey alleleKey = entry.getKey();
+//                    AlleleProto.ClinVar clinvar = entry.getValue();
+//                    String alt = alleleKey.getAlt();
+//                    System.out.println("alleleKey.getAlt__ = " + alt + "\n");
+//                    String ref = alleleKey.getRef();
+//                    int chr = alleleKey.getChr();
+//                    int pos = alleleKey.getPosition();
+//                }
+//            }
+//
+//    }
+
+    //returning ListCvD, and getting VariantEvaluation and geneSymbol, than have start and stop and see where in VariantEvaluation the
+    // criteria hits
+    // instead of getting info from CvD get it from mvStore ? iterate over that list
+//    public List<ClinVarData> getRegionWithSameResidueInRangeOnGene(VariantEvaluation variantEvaluation, MVStore mvStore) {
+//
+//        List<ClinVarData> filteredData = new ArrayList<>();
+//        ClinVarData clinVarData = variantEvaluation.getPathogenicityData().getClinVarData();
+//        // whats coming from pathogenicityData +> pathogenicity scores
+//
+//        String proteinChangeAnalysis = variantEvaluation.getTranscriptAnnotations().get(0).getHgvsProtein();
+//        int start = variantEvaluation.start();
+//        int stop = variantEvaluation.end();
+//
+//        if (proteinChangeAnalysis != null && !proteinChangeAnalysis.isEmpty()) {
+//            String residue = proteinChangeAnalysis.substring(proteinChangeAnalysis.lastIndexOf('.') + 1);
+//            String protein = proteinChangeAnalysis.substring(0, proteinChangeAnalysis.lastIndexOf('.'));
+//
+////            List<ClinVarData> dataList = proteinChangeMap.get(protein);
+//            // instead datalist go to MvStore get it from there
+//
+//            if (dataList != null) {
+//                for (ClinVarData cvd : dataList) {
+//                    if (cvd.getStart() <= stop && cvd.getStop() >= start && cvd.getProteinChange().contains(residue) && cvd.geneSymbol().equals(geneSymbol)) {
+//                        filteredData.add(cvd);
+//                    }
+//                }
+//            }
+//        }
+//        return filteredData;
+//        // add filtered data variants with PM5
+//    }
+//
+//    //BP1 --> GeneClinVarData -.- was prior from parser that also took geneSymbol and geneID
+//    // i think best is to fully update this class with more values and adjust this parser instead of going to mvStore?
+//    public boolean hasPrimarilyTruncatingVariants(HashMap<String, GeneClinVarData> geneClinVarDataMap, String geneSymbol) {
+//        GeneClinVarData gcd  = geneClinVarDataMap.get(geneSymbol);
+//        if (gcd == null) {
+//            return false;
+//        }
+//        return gcd.isOver50PercentPathogenic();
+//    }
+//
+//    public boolean checkBP1(String geneSymbol) {
+//        double missenseToPathogenicLikelyPathogenicRatio = getBenignLikelyBenignMissenseToPathogenicLikelyPathogenicRatio(geneSymbol);
+//        double missenseToAllBenignLikelyBenignRatio = getBenignLikelyBenignMissenseToAllBenignLikelyBenignRatio(geneSymbol);
+//
+//        return missenseToPathogenicLikelyPathogenicRatio > 0.51 && missenseToAllBenignLikelyBenignRatio > 0.24;
+//    }
+//
+//    public double getBenignLikelyBenignMissenseToPathogenicLikelyPathogenicRatio(String geneSymbol) {
+//        if(!geneData.containsKey(geneSymbol)) {
+//            throw new IllegalArgumentException("Gene symbol " + geneSymbol + " not found in data.");
+//        }
+//
+//        GeneTable geneVariants = geneData.get(geneSymbol);
+//
+//        int benignLikelyBenignMissense = 0;
+//        int pathogenicLikelyPathogenic = 0;
+//
+//        for (Map.Entry<VariantEffect, Map<ClinVarData.ClinSig, Integer>> entry : geneVariants.getConsequenceClinicalSignificanceCounts().entrySet()) {
+//            VariantEffect variant = entry.getKey();
+//            Map<ClinVarData.ClinSig, Integer> clinSigCounts = entry.getValue();
+//
+//            for (Map.Entry<ClinVarData.ClinSig, Integer> clinSigEntry : clinSigCounts.entrySet()) {
+//                ClinVarData.ClinSig clinSig = clinSigEntry.getKey();
+//                int count = clinSigEntry.getValue();
+//
+//                if (variant == VariantEffect.MISSENSE_VARIANT) {
+//                    if (clinSig == ClinVarData.ClinSig.BENIGN || clinSig == ClinVarData.ClinSig.LIKELY_BENIGN) {
+//                        benignLikelyBenignMissense += count;
+//                    }
+//                }
+//
+//                if (clinSig == ClinVarData.ClinSig.PATHOGENIC || clinSig == ClinVarData.ClinSig.LIKELY_PATHOGENIC) {
+//                    pathogenicLikelyPathogenic += count;
+//                }
+//            }
+//        }
+//
+//        if(pathogenicLikelyPathogenic == 0) {
+//            return 0.0;
+//        }
+//
+//        return (double) benignLikelyBenignMissense / pathogenicLikelyPathogenic;
+//    }
+//
+//    // gene Data is in DevBP2PP1 // geneTable is the geneStats table i made from XML previously
+//    public double getBenignLikelyBenignMissenseToAllBenignLikelyBenignRatio(String geneSymbol) {
+//        if(!geneData.containsKey(geneSymbol)) {
+//            throw new IllegalArgumentException("Gene symbol " + geneSymbol + " not found in data.");
+//        }
+//
+//        GeneTable geneVariants = geneData.get(geneSymbol);
+//
+//        int benignLikelyBenignMissense = 0;
+//        int totalBenignLikelyBenign = 0;
+//
+//        for (Map.Entry<VariantEffect, Map<ClinVarData.ClinSig, Integer>> entry : geneVariants.getConsequenceClinicalSignificanceCounts().entrySet()) {
+//            VariantEffect variant = entry.getKey();
+//            Map<ClinVarData.ClinSig, Integer> clinSigCounts = entry.getValue();
+//
+//            for (Map.Entry<ClinVarData.ClinSig, Integer> clinSigEntry : clinSigCounts.entrySet()) {
+//                ClinVarData.ClinSig clinSig = clinSigEntry.getKey();
+//                int count = clinSigEntry.getValue();
+//
+//                if (variant == VariantEffect.MISSENSE_VARIANT) {
+//                    if (clinSig == ClinVarData.ClinSig.BENIGN || clinSig == ClinVarData.ClinSig.LIKELY_BENIGN) {
+//                        benignLikelyBenignMissense += count;
+//                    }
+//                }
+//
+//                if (clinSig == ClinVarData.ClinSig.BENIGN || clinSig == ClinVarData.ClinSig.LIKELY_BENIGN) {
+//                    totalBenignLikelyBenign += count;
+//                }
+//            }
+//        }
+//
+//        if(totalBenignLikelyBenign == 0) {
+//            return 0.0;
+//        }
+//
+//        return (double) benignLikelyBenignMissense / totalBenignLikelyBenign;
+//    }
 }

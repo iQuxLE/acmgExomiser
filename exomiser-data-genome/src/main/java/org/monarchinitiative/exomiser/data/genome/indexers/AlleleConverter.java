@@ -93,6 +93,7 @@ public class AlleleConverter {
         return builder.build();
     }
 
+
     private static ClinVar.ClinSig toProtoClinSig(ClinVarData.ClinSig clinSig) {
         switch (clinSig){
             case BENIGN:

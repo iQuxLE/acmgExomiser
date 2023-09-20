@@ -31,21 +31,20 @@ public class PvalueGeneScorer implements GeneScorer {
     private final AcmgAssignmentCalculator acmgAssignmentCalculator;
 
     /**
+     * @param acmgAssignmentCalculator
      * @param probandId                Sample id of the proband in the VCF.
      * @param inheritanceModeAnnotator An {@code InheritanceModeAnnotator} for the pedigree related to the proband.
      * @throws NullPointerException if any input arguments are null.
      * @since 10.0.0
      */
-    public PvalueGeneScorer(String probandId, Pedigree.Individual.Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, CombinedScorePvalueCalculator pValueCalculator) {
+    public PvalueGeneScorer(String probandId, Pedigree.Individual.Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, CombinedScorePvalueCalculator pValueCalculator, AcmgAssignmentCalculator acmgAssignmentCalculator) {
         Objects.requireNonNull(probandId);
         Objects.requireNonNull(inheritanceModeAnnotator);
         this.inheritanceModes = inheritanceModeAnnotator.getDefinedModes();
         this.contributingAlleleCalculator = new ContributingAlleleCalculator(probandId, probandSex, inheritanceModeAnnotator);
         this.genePriorityScoreCalculator = new GenePriorityScoreCalculator();
         this.pValueCalculator = Objects.requireNonNull(pValueCalculator);
-        AcmgEvidenceAssigner acmgEvidenceAssigner = new Acmg2015EvidenceAssigner(probandId, inheritanceModeAnnotator.getPedigree());
-        AcmgEvidenceClassifier acmgEvidenceClassifier = new Acgs2020Classifier();
-        this.acmgAssignmentCalculator = new AcmgAssignmentCalculator(acmgEvidenceAssigner, acmgEvidenceClassifier);
+        this.acmgAssignmentCalculator = Objects.requireNonNull(acmgAssignmentCalculator);
     }
 
     @Override

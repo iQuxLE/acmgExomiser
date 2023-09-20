@@ -1,30 +1,22 @@
-package org.monarchinitiative.exomiser.core.genome.dao;
+package org.monarchinitiative.exomiser.core.genome.dao.serialisers;
 
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.VariantStoreDao;
-import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
-import org.monarchinitiative.exomiser.core.model.Variant;
 import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.Coordinates;
-import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.Strand;
-
 import java.nio.file.Path;
 
-import static org.hamcrest.CoreMatchers.is;
+import static hpo.DiseaseGeneMapper.logger;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 
-class ClinVarDaoMvStoreTest {
-
+class VariantStoreDaoTest {
+    // Variants inside the boundaries:
     private final  AlleleProto.AlleleKey positionStartMinus1 = AlleleProto.AlleleKey.newBuilder()
             .setChr(1)
             .setPosition(1229)
@@ -111,20 +103,11 @@ class ClinVarDaoMvStoreTest {
                 .open();
     }
 
-    private GenomeAssembly genomeAssembly;
-    private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
-    private MVStore mvStore;
-
-    @BeforeEach
-    public void setUp(){
-        genomeAssembly = GenomeAssembly.HG19;
-        mvStore = newMvStore();
-        clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
-
-    }
-
     @Test
     public void FiveInsideAndFourOutsideBoundaries(@TempDir Path tempDir){
+        MVStore mvStore = newMvStore();
+        MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
+
         clinVarMap.put(positionStartMinus1, AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
                 .build());
@@ -166,22 +149,25 @@ class ClinVarDaoMvStoreTest {
                 .build());
 
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
-                .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
+                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
 
-        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(6));
+
     }
 
     @Test
     public void variantsNonOverlap(@TempDir Path tempDir){
+        MVStore mvStore = newMvStore();
+        MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
 
         clinVarMap.put(positionStartMinus3, AlleleProto.ClinVar.newBuilder()
-                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
-                .build());
+                        .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                        .build());
 
         clinVarMap.put(positionEndPlus3, AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.NOT_PROVIDED)
@@ -192,9 +178,9 @@ class ClinVarDaoMvStoreTest {
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
 
-        ClinVarDaoMvStore clinVarDaoMvStore = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
 
-        var result  = clinVarDaoMvStore.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(true));
         assertThat(result.size(), is(0));
 
@@ -218,16 +204,17 @@ class ClinVarDaoMvStoreTest {
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
 
-        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(2));
     }
 
     @Test
     public void variantsOverlapInsideBoundaries(@TempDir Path tempDir){
-
+        MVStore mvStore = newMvStore();
+        MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
 
         clinVarMap.put(positionStartMinus1, AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
@@ -237,53 +224,60 @@ class ClinVarDaoMvStoreTest {
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.NOT_PROVIDED)
                 .build());
 
+        GenomeAssembly genomeAssembly = GenomeAssembly.HG19;
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
 
-        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(2));
     }
 
     @Test
     public void variantsExactlyMatchOnPosition(){
+        MVStore mvStore = newMvStore();
+        MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
 
         clinVarMap.put(positionExactlyMatches, AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
                 .build());
 
+        GenomeAssembly genomeAssembly = GenomeAssembly.HG19;
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
 
-        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(1));
     }
 
     @Test
     public void variantsAreFarOutOfBoundaries(@TempDir Path tempDir){
+        MVStore mvStore = newMvStore();
+        MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
 
         clinVarMap.put(positionFarOutOfBoundariesMinus, AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
                 .build());
 
-//        clinVarMap.put(positionFarOutOfBoundariesPlus, AlleleProto.ClinVar.newBuilder()
-//                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
-//                .build());
+        clinVarMap.put(positionFarOutOfBoundariesPlus, AlleleProto.ClinVar.newBuilder()
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                .build());
 
+        GenomeAssembly genomeAssembly = GenomeAssembly.HG19;
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230,1230), "T", "A")
                 .build();
 
-        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(true));
         assertThat(result.size(), is(0));
 
@@ -291,42 +285,17 @@ class ClinVarDaoMvStoreTest {
 
     @Test
     public void noVariantsGettingAddedNoOverlap(){
+        MVStore mvStore = newMvStore();
+        MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> emptyCVMap = MvStoreUtil.openClinVarMVMap(mvStore);
+        VariantStoreDao variantStoreDao = new VariantStoreDao(mvStore);
+        GenomeAssembly genomeAssembly = GenomeAssembly.HG19;
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
 
-        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
-
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result = variantStoreDao.findEntriesInRange(variantEvaluation);
         assertThat(result.isEmpty(), is(true));
         assertThat(result.size(), is(0));
 
-    }
-
-    @Test
-    void getClinVarData() {
-        try (MVStore mvStore = new MVStore.Builder().open()) {
-            var clinvarMap = MvStoreUtil.openClinVarMVMap(mvStore);
-            AlleleProto.AlleleKey alleleKey = AlleleProto.AlleleKey.newBuilder().setChr(1).setPosition(200).setRef("A").setAlt("T").build();
-            AlleleProto.ClinVar clinVar = AlleleProto.ClinVar.newBuilder()
-                    .setAlleleId("12345")
-                    .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
-                    .setReviewStatus("criteria_provided,_multiple_submitters,_no_conflicts")
-                    .build();
-            clinvarMap.put(alleleKey, clinVar);
-            GenomeAssembly genomeAssembly = GenomeAssembly.HG19;
-            ClinVarDao instance = new ClinVarDaoMvStore(mvStore, genomeAssembly);
-            Variant clinVarVariant = VariantEvaluation.builder()
-                    .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(200, 200), "A", "T")
-                    .build();
-
-            assertThat(instance.getClinVarData(clinVarVariant), equalTo(AlleleProtoAdaptor.toClinVarData(clinVar)));
-
-            Variant nonClinVarVariant = VariantEvaluation.builder()
-                    .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(200, 200), "A", "A")
-                    .build();
-
-            assertThat(instance.getClinVarData(nonClinVarVariant), equalTo(ClinVarData.empty()));
-        }
     }
 }

@@ -20,11 +20,14 @@
 
 package org.monarchinitiative.exomiser.core.analysis;
 
+import org.h2.mvstore.MVStore;
 import org.monarchinitiative.exomiser.core.analysis.sample.PedigreeSampleValidator;
 import org.monarchinitiative.exomiser.core.analysis.sample.Sample;
 import org.monarchinitiative.exomiser.core.analysis.util.*;
+import org.monarchinitiative.exomiser.core.analysis.util.acmg.*;
 import org.monarchinitiative.exomiser.core.filters.*;
 import org.monarchinitiative.exomiser.core.genome.*;
+import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.prioritisers.Prioritiser;
 import org.monarchinitiative.exomiser.core.prioritisers.PriorityType;
@@ -132,7 +135,11 @@ abstract class AbstractAnalysisRunner implements AnalysisRunner {
         List<Gene> genesToScore = variantsLoaded ? getGenesWithVariants(allGenes) : allGenes.values().stream().filter(genesToScore()).collect(Collectors.toUnmodifiableList());
         // Temporarily add a new PValueGeneScorer so as not to break semver will revert to RawScoreGeneScorer in 14.0.0
         CombinedScorePvalueCalculator combinedScorePvalueCalculator = buildCombinedScorePvalueCalculator(sample, analysis, genesToScore.size());
-        GeneScorer geneScorer = new PvalueGeneScorer(probandIdentifier, sample.getSex(), inheritanceModeAnnotator, combinedScorePvalueCalculator);
+
+        AcmgEvidenceAssigner acmgEvidenceAssigner = new Acmg2015EvidenceAssigner(probandIdentifier, inheritanceModeAnnotator.getPedigree(), genomeAnalysisService.getVariantAnnotator(), genomeAnalysisService);
+        AcmgEvidenceClassifier acmgEvidenceClassifier = new Acgs2020Classifier();
+        AcmgAssignmentCalculator acmgAssignmentCalculator = new AcmgAssignmentCalculator(acmgEvidenceAssigner, acmgEvidenceClassifier);
+        GeneScorer geneScorer = new PvalueGeneScorer(probandIdentifier, sample.getSex(), inheritanceModeAnnotator, combinedScorePvalueCalculator, acmgAssignmentCalculator);
 
         logger.info("Scoring genes");
         List<Gene> genes = geneScorer.scoreGenes(genesToScore);
