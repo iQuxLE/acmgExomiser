@@ -72,6 +72,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
     private VariantDataService variantDataService;
     private VariantAnnotator variantAnnotator;
 
+    private int processedVariantCount = 0;
+
 
     public Acmg2015EvidenceAssigner(String probandId, Pedigree pedigree) {
         this.probandId = Objects.requireNonNull(probandId);
@@ -285,7 +287,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             if (!annotatedVariantList.isEmpty()) {
 
                 VariantAnnotation variantAnnotation = annotatedVariantList.get(0);
-                logger.info("jh" + variantAnnotation);
 
                 if (variantAnnotation.hasTranscriptAnnotations()) {
                     VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
@@ -305,12 +306,18 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                         && !cdnaChangeFromInput.equals(cdnaChangeFromProto)
                         && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT){
                         acmgEvidenceBuilder.add(PS1);
+                        processedVariantCount++;
+
                     }
                 }
             }
         }
     }
 }
+    // helper to keep track of variants running through tests assignPS1
+    public int getProcessedVariantCount(){
+        return processedVariantCount;
+    }
 
 
     /**

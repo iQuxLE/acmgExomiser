@@ -67,7 +67,7 @@ class TestVariantDataServiceTest {
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.LIKELY_PATHOGENIC)
                 .build();
 
-        TestVariantDataServiceCarlo service = TestVariantDataServiceCarlo.builder()
+        TestVariantDataService service = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 .putAK(positionEndPlus1, clinVar1)
@@ -92,56 +92,4 @@ class TestVariantDataServiceTest {
 
     }
 }
-
-//    @Test
-//    public void testExpectMvMapWorks() {
-//
-//        GenomicVariant genomicVariant = GenomicVariant.of(GenomeAssembly.HG19.getContigById(10), Strand.POSITIVE, Coordinates.oneBased(1200, 1200), "T", "A");
-//        ClinVarData clinVarData = ClinVarData.builder().primaryInterpretation(ClinVarData.ClinSig.PATHOGENIC).build();
-//
-//        GenomicVariant genomicVariant2 = GenomicVariant.of(GenomeAssembly.HG19.getContigById(10), Strand.POSITIVE, Coordinates.oneBased(1200, 1200), "G", "C");
-//        ClinVarData clinVarData2 = ClinVarData.builder().primaryInterpretation(ClinVarData.ClinSig.PATHOGENIC).build();
-//
-//        TestVariantDataService service = TestVariantDataService.builder()
-//                .setMVStore(mvStore)
-//                .put(genomicVariant, clinVarData)
-//                .put(genomicVariant2, clinVarData2)
-//                .build();
-//
-//
-//        GenomicInterval genomicInterval = GenomicInterval.of(GenomeAssembly.HG19.getContigById(10), Strand.POSITIVE, Coordinates.oneBased(1200, 1200));
-//
-//        Map<GenomicVariant, ClinVarData> resultMap = service.findClinVarDataOverlappingGenomicInterval(genomicInterval);
-//        assertTrue(resultMap.containsKey(genomicVariant));
-//        assertTrue(resultMap.containsKey(genomicVariant2));
-//        assertEquals(clinVarData, resultMap.get(genomicVariant));
-//        assertEquals(clinVarData2, resultMap.get(genomicVariant2));
-//
-//    }
-//    @Test
-//    public void FiveInsideAndFourOutsideBoundaries(@TempDir Path tempDir){
-//        clinVarMap.put(positionStartMinus1, AlleleProto.ClinVar.newBuilder()
-//                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
-//                .build());
-//
-//        clinVarMap.put(positionEndPlus1, AlleleProto.ClinVar.newBuilder()
-//                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.LIKELY_PATHOGENIC)
-//                .build());
-//
-//        TestVariantDataService service = TestVariantDataService.builder()
-//                .setMVStore(newMvStore())
-//                .put(positionEndPlus1, clinVarData) // so that it takes proto Maps and converts to normal ?
-//                .put(positionEndPlus1, clinVarData2)
-//                .build();
-//
-//        VariantEvaluation variantEvaluation = VariantEvaluation.builder()
-//                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
-//                .build();
-//
-//        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, GenomeAssembly.HG19);
-//
-//        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
-//        assertThat(result.isEmpty(), is(false));
-//        assertThat(result.size(), is(6));
-//    }
 

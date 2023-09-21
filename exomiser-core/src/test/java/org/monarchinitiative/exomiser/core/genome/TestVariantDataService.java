@@ -59,8 +59,6 @@ import java.util.stream.Collectors;
  */
 public class TestVariantDataService implements VariantDataService {
     private static final Logger logger = LoggerFactory.getLogger(TestVariantDataService.class);
-
-
     private static final VariantDataService STUB_SERVICE = new VariantDataServiceStub();
     private final GenomeAssembly genomeAssembly;
 
@@ -69,8 +67,6 @@ public class TestVariantDataService implements VariantDataService {
     private final Map<Variant, PathogenicityData> expectedPathogenicityData;
     private final MVStore mvStore;
     private final ClinVarDao clinVarDao;
-
-//    private final MVMap<GenomicVariant, ClinVarData> expectedMvMap;
     private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
 
 
@@ -78,14 +74,11 @@ public class TestVariantDataService implements VariantDataService {
         this.expectedWhiteList = ImmutableSet.copyOf(builder.expectedWhiteList);
         this.expectedFrequencyData = ImmutableMap.copyOf(builder.expectedFrequencyData);
         this.expectedPathogenicityData = ImmutableMap.copyOf(builder.expectedPathogenicityData);
-//        this.expectedMvMap = builder.temporaryMap;
         this.mvStore = builder.mvStore;
         this.genomeAssembly = builder.genomeAssembly;
         this.clinVarDao = new ClinVarDaoMvStore(builder.mvStore, builder.genomeAssembly);
         this.clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
-        ;
-//        mvStore.openMap("expectedMvMap");
-    }
+        }
 
     /**
      * Returns a stub service containing no data.
@@ -118,10 +111,6 @@ public class TestVariantDataService implements VariantDataService {
         expectedPathogenicityData.put(variant, pathogenicityData);
     }
 
-//    public void put(GenomicVariant genomicVariant, ClinVarData clinVarData){
-//        expectedMvMap.put(genomicVariant, clinVarData);
-//    }
-
     @Override
     public boolean variantIsWhiteListed(Variant variant) {
         return expectedWhiteList.contains(variant);
@@ -151,21 +140,8 @@ public class TestVariantDataService implements VariantDataService {
         return PathogenicityData.of(pathData.getClinVarData(), wanted);
     }
 
-
-    public ClinVarData getClinVarDataFromGenomicVariant(@Nonnull GenomicVariant variant) {
-        AlleleProto.AlleleKey alleleKey = AlleleProtoAdaptor.toAlleleKey(variant);
-        AlleleProto.ClinVar clinVar = clinVarMap.get(alleleKey);
-        return clinVar == null ? ClinVarData.empty() : AlleleProtoAdaptor.toClinVarData(clinVar);
-    }
-
-    public GenomicVariant alleleKeyToGenomicVariant(AlleleProto.AlleleKey alleleKey, Contig contig) {
-        return GenomicVariant.builder()
-                .variant(contig, Strand.POSITIVE, Coordinates.oneBased(alleleKey.getPosition(), alleleKey.getPosition()), alleleKey.getRef(), alleleKey.getAlt()).build();
-    }
-
     @Override
     public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval) {
-        logger.info("Map size during retrieval: " + clinVarMap.size());
         return clinVarDao.findClinVarDataOverlappingGenomicInterval(genomicInterval);
     }
 
@@ -206,8 +182,6 @@ public class TestVariantDataService implements VariantDataService {
                 throw new IllegalStateException("MVMap is not initialized. Ensure you have called setMVStore() before using put().");
             }
             this.clinVarMap.put(AlleleKey, ClinVar);
-            System.out.println("Map size after put: " + clinVarMap.size());
-            System.out.println("Contents: " + clinVarMap.entrySet());
             return this;
         }
 
@@ -237,7 +211,6 @@ public class TestVariantDataService implements VariantDataService {
         }
 
         public TestVariantDataService build() {
-            System.out.println("Map size before build: " + clinVarMap.size());
             return new TestVariantDataService(this);
         }
     }

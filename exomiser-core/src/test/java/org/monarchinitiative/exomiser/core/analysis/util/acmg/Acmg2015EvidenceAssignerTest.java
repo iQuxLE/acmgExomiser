@@ -38,7 +38,7 @@ import static org.monarchinitiative.exomiser.core.model.Pedigree.justProband;
 
 class Acmg2015EvidenceAssignerTest {
 
-    private AlleleProto.AlleleKey pos123247514var1Reference = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant1a = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
             .setRef("C")
@@ -46,46 +46,37 @@ class Acmg2015EvidenceAssignerTest {
             .build();
 
 
-    private AlleleProto.AlleleKey pos123247514samePositionDifferentCdnaSameProteinChange = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant1b = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
             .setRef("G")
             .setAlt("C")
             .build();
 
-    private AlleleProto.AlleleKey pos123247515sameCodonDifferentCdnaSameProteinChange = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant2 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247515)
             .setRef("C")
             .setAlt("T")
             .build();
 
-
-    private AlleleProto.AlleleKey differentChrDifferentCodonDifferentCdnaSameProteinChangeNotPathogenic = AlleleProto.AlleleKey.newBuilder()
-            .setChr(11)
-            .setPosition(108124619)
-            .setRef("G")
-            .setAlt("C")
-            .build();
-
-    private AlleleProto.AlleleKey pos123276893variant2Reference = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276893)
-            .setRef("T")
-            .setAlt("A")
-            .build();
-
-
-    private AlleleProto.AlleleKey pos123276892sameCodonDifferentNucleotideDifferentCdnaSameProteinChange = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant3 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123276892)
             .setRef("G")
             .setAlt("C")
             .build();
 
-    private AlleleProto.AlleleKey Variant2_sameCodonDifferentCdnaDifferentProteinChange = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant4 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
-            .setPosition(123247514)
+            .setPosition(123276893)
+            .setRef("T")
+            .setAlt("A")
+            .build();
+
+    private AlleleProto.AlleleKey variant5 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(11)
+            .setPosition(108124619)
             .setRef("G")
             .setAlt("C")
             .build();
@@ -116,8 +107,8 @@ class Acmg2015EvidenceAssignerTest {
         TestVariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                .putAK(pos123247514samePositionDifferentCdnaSameProteinChange, clinVarPathogenic)
-                .putAK(pos123247515sameCodonDifferentCdnaSameProteinChange, clinVarPathogenic)
+                .putAK(variant1b, clinVarPathogenic)
+                .putAK(variant2, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -138,6 +129,7 @@ class Acmg2015EvidenceAssignerTest {
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
+        assertThat(instance.getProcessedVariantCount(), is(2));
     }
     @Test
     void testAssignPS1_completeMismatch() {
@@ -145,7 +137,7 @@ class Acmg2015EvidenceAssignerTest {
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //no match
-                .putAK(pos123247514samePositionDifferentCdnaSameProteinChange, clinVarPathogenic)
+                .putAK(variant1b, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator,variantDataService);
@@ -165,6 +157,7 @@ class Acmg2015EvidenceAssignerTest {
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(instance.getProcessedVariantCount(), is(0));
     }
     @Test
     void testAssignPS1_oneMismatchTwoHit() {
@@ -172,10 +165,10 @@ class Acmg2015EvidenceAssignerTest {
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 // two match
-                .putAK(pos123276892sameCodonDifferentNucleotideDifferentCdnaSameProteinChange, clinVarPathogenic)
-                .putAK(pos123276893variant2Reference, clinVarPathogenic)
+                .putAK(variant3, clinVarPathogenic)
+                .putAK(variant4, clinVarPathogenic)
                 // no match
-                .putAK(pos123247514samePositionDifferentCdnaSameProteinChange, clinVarPathogenic)
+                .putAK(variant1b, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -195,7 +188,7 @@ class Acmg2015EvidenceAssignerTest {
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
-        // check for size or output to check that it really one 2 of 3
+        assertThat(instance.getProcessedVariantCount(), is(2));
     }
     @Test
     void testAssignPS1_sameCodonDifferentNucleotideSameProteinChangeDifferentCdna() {
@@ -207,9 +200,9 @@ class Acmg2015EvidenceAssignerTest {
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //sameCodonDifferentNucleotideDifferentCdnaSameProteinChange
-                .putAK(pos123276892sameCodonDifferentNucleotideDifferentCdnaSameProteinChange, clinVarPathogenic)
+                .putAK(variant3, clinVarPathogenic)
                 //DifferentCodonDifferentCdnaDifferentProteinChange - NO MATCH
-                .putAK(pos123247514samePositionDifferentCdnaSameProteinChange, clinVarPathogenic)
+                .putAK(variant1b, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -230,6 +223,7 @@ class Acmg2015EvidenceAssignerTest {
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
+        assertThat(instance.getProcessedVariantCount(), is(1));
     }
     @Test
     void testAssignPS1_NoMissense() {
@@ -237,8 +231,8 @@ class Acmg2015EvidenceAssignerTest {
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                .putAK(pos123247514samePositionDifferentCdnaSameProteinChange, clinVarPathogenic)
-                .putAK(pos123247515sameCodonDifferentCdnaSameProteinChange, clinVarPathogenic)
+                .putAK(variant1b, clinVarPathogenic)
+                .putAK(variant2, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -258,6 +252,7 @@ class Acmg2015EvidenceAssignerTest {
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(instance.getProcessedVariantCount(), is(0));
     }
     @Test
     void testAssignPS1_NotPathogenicSameCodon() {
@@ -265,7 +260,7 @@ class Acmg2015EvidenceAssignerTest {
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //no match
-                .putAK(pos123247515sameCodonDifferentCdnaSameProteinChange, clinVarBenign)
+                .putAK(variant2, clinVarBenign)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -286,6 +281,7 @@ class Acmg2015EvidenceAssignerTest {
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(instance.getProcessedVariantCount(), is(0));
     }
 //
 //    @Test
