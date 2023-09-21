@@ -32,7 +32,6 @@ import org.h2.mvstore.MVStore;
 import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
 import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDaoMvStore;
 import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
-import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
 import org.monarchinitiative.exomiser.core.model.Variant;
 import org.monarchinitiative.exomiser.core.model.frequency.Frequency;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
@@ -46,7 +45,6 @@ import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.stream.Collectors;
 

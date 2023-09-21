@@ -99,7 +99,6 @@ class Acmg2015EvidenceAssignerTest {
         return new MVStore.Builder().compress().open();
     }
 
-    // put into 2nd constructor (annotator)
     private final JannovarVariantAnnotator jannovarAnnotator = new JannovarVariantAnnotator(TestFactory.getDefaultGenomeAssembly(), TestFactory
             .buildDefaultJannovarData(), ChromosomalRegionIndex.empty());
     @Test
@@ -195,7 +194,6 @@ class Acmg2015EvidenceAssignerTest {
         //123276892 is definitly in NCBI and its G>C1025 and its Cys342Ser
         //123276893 is definitly in NCBI and its T>A1024 and its Cys342Ser
 
-        // should be not empty but is empty
         TestVariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)

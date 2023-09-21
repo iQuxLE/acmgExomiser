@@ -4,21 +4,12 @@ import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
-import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDaoMvStore;
 import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
 import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
-import org.monarchinitiative.exomiser.core.model.Variant;
-import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
-import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityData;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.*;
 
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -58,7 +49,7 @@ class TestVariantDataServiceTest {
     }
 
     @Test
-    public void test() {
+    public void testClinVarDaoMvStoreViaVariantDataService() {
         AlleleProto.ClinVar clinVar1 = AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
                 .build();
@@ -89,7 +80,6 @@ class TestVariantDataServiceTest {
         assertTrue(resultMap.containsKey(keyVariant2));
         assertEquals(clinVarValue1, resultMap.get(keyVariant1));
         assertEquals(clinVarValue2, resultMap.get(keyVariant2));
-
     }
 }
 
