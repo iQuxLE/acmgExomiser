@@ -21,9 +21,7 @@
 package org.monarchinitiative.exomiser.core.model;
 
 import com.google.common.collect.ImmutableMap;
-import org.h2.mvstore.MVMap;
 import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
 import org.monarchinitiative.exomiser.core.model.frequency.Frequency;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencySource;
@@ -41,7 +39,6 @@ import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 
 import static org.monarchinitiative.exomiser.core.model.frequency.FrequencySource.*;
@@ -134,39 +131,12 @@ public class AlleleProtoAdaptor {
                 .build();
     }
 
-    // gets ClinVarData from AlleleProto.ClinVar (used in TestVariantDataService, to convert the given AlleleKeys to ClinVarData
-    // some done for AlleleKey to GenomicVariant to check if Key is contained in resultMap
-    // same proably used then in assignPS1
-
-    // because in TestVariantDataService we give it
-    // MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar) clinVarMap
-    // Mvstore mvstore
-    // ClinVarDao clinvardao
-    // then we do this in Constructor:
-
-    // mvStore = MvStoreUtils.openClinVarMap(mvStore) <-- by this making sure its same map
-    // clinvardao = new ClinVarDao(mvStore, genomeAssembly)
-    // actually when working with clinvardao the MvStoreUtils.open is done by ClinVarDao so we should directly go with MvStore
-    // but maybe in builder have a function to set ClinVarDao with the given setMvStore ?
-
-    // by now:
-//            this.mvStore = builder.mvStore;
-//        this.genomeAssembly = builder.genomeAssembly;
-//        this.clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore); <-- this also needs to happen in setUpMvStore in builder loook Carlo
-
-
-
-    // and the put function for the Map will work with AlleleProto.AlleleKey and AlleleProto.ClinVar
-    // so we have to do it like in ClinVarDaoTest and create like this everything and to check if keys are there
-    // just use the converting function from AlleleProtoAdapter otherwise only sie check is possible
     public static ClinVarData getClinVarDataPrimaryInterpretationFromAlleleProtoClinVar(AlleleProto.ClinVar clinVar){
         ClinVarData.ClinSig primaryInterpretation = fromClinVarPrototoClinSig1(clinVar.getPrimaryInterpretation());
         return ClinVarData.builder().primaryInterpretation(primaryInterpretation).build();
 
     }
-    // GenomeAssembly is a gamble: For testing no problem, but difficult to use in production? clinvardao should be fine with Contig
-    // as GenomeASsembly is a collection of Contigs
-    // proceed and see later
+
     public static GenomicVariant getGenomicVariantFromProtoAlleleKey(AlleleProto.AlleleKey alleleKey, GenomeAssembly genomeAssembly){
         logger.info("Using " + genomeAssembly);
         logger.info("if something fails check GenomeAssembly part // may write new function with contig use");
@@ -230,10 +200,6 @@ public class AlleleProtoAdaptor {
         builder.reviewStatus(clinVar.getReviewStatus());
         return builder.build();
     }
-
-    /*
-    only for testing in TestVariantDataService
-     */
 
     private static Map<String, ClinVarData.ClinSig> getToIncludedAlleles(Map<String, ClinVar.ClinSig> includedAllelesMap) {
         if (includedAllelesMap.isEmpty()) {
