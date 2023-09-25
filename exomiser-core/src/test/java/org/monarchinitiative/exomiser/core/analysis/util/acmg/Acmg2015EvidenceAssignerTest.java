@@ -38,7 +38,7 @@ import static org.monarchinitiative.exomiser.core.model.Pedigree.justProband;
 
 class Acmg2015EvidenceAssignerTest {
 
-    private AlleleProto.AlleleKey variant1a = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant1aPos123247514 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
             .setRef("C")
@@ -46,35 +46,42 @@ class Acmg2015EvidenceAssignerTest {
             .build();
 
 
-    private AlleleProto.AlleleKey variant1b = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant1bPos123247514 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
             .setRef("G")
             .setAlt("C")
             .build();
 
-    private AlleleProto.AlleleKey variant2 = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant2Pos123247515 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247515)
             .setRef("C")
             .setAlt("T")
             .build();
 
-    private AlleleProto.AlleleKey variant3 = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant3Pos123276892 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123276892)
             .setRef("G")
             .setAlt("C")
             .build();
 
-    private AlleleProto.AlleleKey variant4 = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant4Pos123276893 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123276893)
             .setRef("T")
             .setAlt("A")
             .build();
 
-    private AlleleProto.AlleleKey variant5 = AlleleProto.AlleleKey.newBuilder()
+    private AlleleProto.AlleleKey variant7Pos123276893 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276893)
+            .setRef("T")
+            .setAlt("G")
+            .build();
+
+    private AlleleProto.AlleleKey variant5Pos108124619 = AlleleProto.AlleleKey.newBuilder()
             .setChr(11)
             .setPosition(108124619)
             .setRef("G")
@@ -83,10 +90,12 @@ class Acmg2015EvidenceAssignerTest {
 
     private final AlleleProto.ClinVar clinVarPathogenic = AlleleProto.ClinVar.newBuilder()
             .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+            .setReviewStatus("criteria provided, multiple submitters, no conflicts")
             .build();
 
     private final AlleleProto.ClinVar clinVarBenign = AlleleProto.ClinVar.newBuilder()
             .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.BENIGN)
+            .setReviewStatus("criteria provided, multiple submitters, no conflicts")
             .build();
 
 
@@ -106,8 +115,38 @@ class Acmg2015EvidenceAssignerTest {
         TestVariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                .putAK(variant1b, clinVarPathogenic)
-                .putAK(variant2, clinVarPathogenic)
+                //match
+                .put(variant3Pos123276892, clinVarPathogenic)
+                .build();
+
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .hgvsProtein("p.(Cys342Ser)")
+                .hgvsCdna("c.1024T>A")
+                .build();
+
+        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276893, "T", "A")
+                .geneSymbol("FGFR2")
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .annotations(List.of(transcriptAnnotation))
+                .build();
+
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        instance.assignPS1(builder, variantEvaluation);
+        assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
+        assertThat(instance.getProcessedVariantCount(), is(1)); // try 2 with same variant
+    }
+    @Test
+    void testAssignPS1_sameButNewPs1Function() {
+        TestVariantDataService variantDataService = TestVariantDataService.builder()
+                .setMVStore(buildMvStore())
+                .setGenomeAssembly(GenomeAssembly.HG19)
+                .put(variant1bPos123247514, clinVarPathogenic)
+                //no match
+                .put(variant2Pos123247515, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -124,19 +163,19 @@ class Acmg2015EvidenceAssignerTest {
                 .annotations(List.of(transcriptAnnotation))
                 .build();
 
-
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
         instance.assignPS1(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(instance.getProcessedVariantCount(), is(2));
     }
+
     @Test
     void testAssignPS1_completeMismatch() {
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //no match
-                .putAK(variant1b, clinVarPathogenic)
+                .put(variant1bPos123247514, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator,variantDataService);
@@ -164,10 +203,10 @@ class Acmg2015EvidenceAssignerTest {
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 // two match
-                .putAK(variant3, clinVarPathogenic)
-                .putAK(variant4, clinVarPathogenic)
+                .put(variant3Pos123276892, clinVarPathogenic)
+                .put(variant4Pos123276893, clinVarPathogenic)
                 // no match
-                .putAK(variant1b, clinVarPathogenic)
+                .put(variant1bPos123247514, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -191,16 +230,13 @@ class Acmg2015EvidenceAssignerTest {
     }
     @Test
     void testAssignPS1_sameCodonDifferentNucleotideSameProteinChangeDifferentCdna() {
-        //123276892 is definitly in NCBI and its G>C1025 and its Cys342Ser
-        //123276893 is definitly in NCBI and its T>A1024 and its Cys342Ser
-
         TestVariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //sameCodonDifferentNucleotideDifferentCdnaSameProteinChange
-                .putAK(variant3, clinVarPathogenic)
+                .put(variant3Pos123276892, clinVarPathogenic)
                 //DifferentCodonDifferentCdnaDifferentProteinChange - NO MATCH
-                .putAK(variant1b, clinVarPathogenic)
+                .put(variant1bPos123247514, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -211,7 +247,7 @@ class Acmg2015EvidenceAssignerTest {
                 .hgvsCdna("c.1024T>A")
                 .build();
 
-        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276893, "T", "A")// when 123247514 "C" "A" its working so failure in the matrix maybe human mistake when taking over from NCBI
+        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276893, "T", "A")
                 .geneSymbol("FGFR2")
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
                 .annotations(List.of(transcriptAnnotation))
@@ -229,8 +265,8 @@ class Acmg2015EvidenceAssignerTest {
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                .putAK(variant1b, clinVarPathogenic)
-                .putAK(variant2, clinVarPathogenic)
+                .put(variant1bPos123247514, clinVarPathogenic)
+                .put(variant2Pos123247515, clinVarPathogenic)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -258,7 +294,7 @@ class Acmg2015EvidenceAssignerTest {
                 .setMVStore(buildMvStore())
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //no match
-                .putAK(variant2, clinVarBenign)
+                .put(variant2Pos123247515, clinVarBenign)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -281,10 +317,17 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(instance.getProcessedVariantCount(), is(0));
     }
-//
+
 //    @Test
 //    void testAssignsPVS1() {
-//        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator);
+//        VariantDataService variantDataService = TestVariantDataService.builder()
+//                .setMVStore(buildMvStore())
+//                .setGenomeAssembly(GenomeAssembly.HG19)
+//                //no match
+//                .putAK(variant2Pos123247515, clinVarBenign)
+//                .build();
+//
+//        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 //        // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
 //        // requires variant to be on a transcript predicted to undergo NMD in a LoF-intolerant gene for full PVS1
 //        TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()

@@ -175,7 +175,7 @@ public class TestVariantDataService implements VariantDataService {
             return this;
         }
 
-        public Builder putAK(AlleleProto.AlleleKey AlleleKey, AlleleProto.ClinVar ClinVar){
+        public Builder put(AlleleProto.AlleleKey AlleleKey, AlleleProto.ClinVar ClinVar){
             if (clinVarMap == null) {
                 throw new IllegalStateException("MVMap is not initialized. Ensure you have called setMVStore() before using put().");
             }

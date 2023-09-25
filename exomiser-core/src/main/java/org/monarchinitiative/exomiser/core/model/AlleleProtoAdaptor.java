@@ -121,27 +121,12 @@ public class AlleleProtoAdaptor {
     }
 
     public static AlleleKey toAlleleKey(GenomicVariant variant) {
-        // ARGH! I didn't put the frikking genome assembly in the alleleKey!
-        // adding it will probably make the data backwards-incompatible as the MVStore is essentially a TreeMap
         return AlleleKey.newBuilder()
                 .setChr(variant.contigId())
                 .setPosition(variant.start())
                 .setRef(variant.ref())
                 .setAlt(variant.alt())
                 .build();
-    }
-
-    public static ClinVarData getClinVarDataPrimaryInterpretationFromAlleleProtoClinVar(AlleleProto.ClinVar clinVar){
-        ClinVarData.ClinSig primaryInterpretation = fromClinVarPrototoClinSig1(clinVar.getPrimaryInterpretation());
-        return ClinVarData.builder().primaryInterpretation(primaryInterpretation).build();
-
-    }
-
-    public static GenomicVariant getGenomicVariantFromProtoAlleleKey(AlleleProto.AlleleKey alleleKey, GenomeAssembly genomeAssembly){
-        logger.info("Using " + genomeAssembly);
-        logger.info("if something fails check GenomeAssembly part // may write new function with contig use");
-        return GenomicVariant.builder().variant(genomeAssembly.getContigById(alleleKey.getChr()), Strand.POSITIVE,
-                Coordinates.oneBased(alleleKey.getPosition(),alleleKey.getPosition()), alleleKey.getRef(), alleleKey.getAlt()).build();
     }
 
     public static FrequencyData toFrequencyData(AlleleProperties alleleProperties) {
@@ -226,43 +211,6 @@ public class AlleleProtoAdaptor {
     }
 
     private static ClinVarData.ClinSig toClinSig(ClinVar.ClinSig protoClinSig) {
-        switch (protoClinSig) {
-            case BENIGN:
-                return ClinVarData.ClinSig.BENIGN;
-            case BENIGN_OR_LIKELY_BENIGN:
-                return ClinVarData.ClinSig.BENIGN_OR_LIKELY_BENIGN;
-            case LIKELY_BENIGN:
-                return ClinVarData.ClinSig.LIKELY_BENIGN;
-            case UNCERTAIN_SIGNIFICANCE:
-                return ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE;
-            case LIKELY_PATHOGENIC:
-                return ClinVarData.ClinSig.LIKELY_PATHOGENIC;
-            case PATHOGENIC_OR_LIKELY_PATHOGENIC:
-                return ClinVarData.ClinSig.PATHOGENIC_OR_LIKELY_PATHOGENIC;
-            case PATHOGENIC:
-                return ClinVarData.ClinSig.PATHOGENIC;
-            case CONFLICTING_PATHOGENICITY_INTERPRETATIONS:
-                return ClinVarData.ClinSig.CONFLICTING_PATHOGENICITY_INTERPRETATIONS;
-            case AFFECTS:
-                return ClinVarData.ClinSig.AFFECTS;
-            case ASSOCIATION:
-                return ClinVarData.ClinSig.ASSOCIATION;
-            case DRUG_RESPONSE:
-                return ClinVarData.ClinSig.DRUG_RESPONSE;
-            case OTHER:
-                return ClinVarData.ClinSig.OTHER;
-            case PROTECTIVE:
-                return ClinVarData.ClinSig.PROTECTIVE;
-            case RISK_FACTOR:
-                return ClinVarData.ClinSig.RISK_FACTOR;
-            case NOT_PROVIDED:
-            case UNRECOGNIZED:
-            default:
-                return ClinVarData.ClinSig.NOT_PROVIDED;
-        }
-    }
-
-    private static ClinVarData.ClinSig fromClinVarPrototoClinSig1(AlleleProto.ClinVar.ClinSig protoClinSig) {
         switch (protoClinSig) {
             case BENIGN:
                 return ClinVarData.ClinSig.BENIGN;

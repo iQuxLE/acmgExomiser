@@ -52,7 +52,7 @@ public class ClinVarDaoMvStore implements ClinVarDao {
     @Override
     public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval) {
         Map<GenomicVariant, ClinVarData> results = new LinkedHashMap<>();
-        logger.info("open ClinVarMap and show content: " + clinVarMap.size());
+        logger.debug("open ClinVarMap and show content: " + clinVarMap.size());
         Contig contig = genomicInterval .contig();
         if (!genomeAssembly.containsContig(contig)) {
             return Collections.emptyMap();
@@ -62,38 +62,28 @@ public class ClinVarDaoMvStore implements ClinVarDao {
         int start = genomicInterval.start();
         int end = genomicInterval.end();
 
-
-
-        // MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap --> opened by MvStore, contains data, search/iterate in this Map
-        // when hitting a Key in the map make it to a GenomicVariant, same for Value make it to ClinVarData
-        // put the key + values inside the new Map <MapGenomicVariant, ClinVarData>
-
-
         // build Allele keys for map and define bounds
         AlleleProto.AlleleKey lowerBound = AlleleProto.AlleleKey.newBuilder()
                 .setChr(chr)
-                .setPosition(start - 2)
+                .setPosition(start)
                 .build();
         AlleleProto.AlleleKey upperBound = AlleleProto.AlleleKey.newBuilder()
                 .setChr(chr)
-                .setPosition(end + 2)
+                .setPosition(end)
                 .build();
 
-        // what if floor key is null
-
-        // add to map
         AlleleProto.AlleleKey floorKey = clinVarMap.floorKey(lowerBound);
         if (floorKey != null && floorKey.getPosition() < lowerBound.getPosition()) {
             lowerBound = floorKey;
         }
 
-        logger.info("Iterate through entries");
+        logger.debug("Iterate through entries");
         Iterator<AlleleProto.AlleleKey> keyIterator = clinVarMap.keyIterator(lowerBound);
 
         while (keyIterator.hasNext()) {
             AlleleProto.AlleleKey ak = keyIterator.next();
             // don't process keys out of the initial boundaries
-            if (ak.getPosition() >= start - 2 && ak.getPosition() <= end + 2) {
+            if (ak.getPosition() >= start && ak.getPosition() <= end) {
                 GenomicVariant gvFromAk = alleleKeyToGenomicVariant(ak, contig);
                 ClinVarData cvData = getClinVarDataFromGenomicVariant(gvFromAk);
                 results.put(gvFromAk, cvData);

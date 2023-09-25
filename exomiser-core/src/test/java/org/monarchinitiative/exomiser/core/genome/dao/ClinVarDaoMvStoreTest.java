@@ -171,7 +171,7 @@ class ClinVarDaoMvStoreTest {
 
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2, 2));
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(6));
     }
@@ -194,7 +194,7 @@ class ClinVarDaoMvStoreTest {
 
         ClinVarDaoMvStore clinVarDaoMvStore = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
-        var result  = clinVarDaoMvStore.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = clinVarDaoMvStore.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
         assertThat(result.isEmpty(), is(true));
         assertThat(result.size(), is(0));
 
@@ -220,7 +220,7 @@ class ClinVarDaoMvStoreTest {
 
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(2));
     }
@@ -243,7 +243,7 @@ class ClinVarDaoMvStoreTest {
 
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
         assertThat(result.isEmpty(), is(false));
         assertThat(result.size(), is(2));
     }
@@ -273,9 +273,9 @@ class ClinVarDaoMvStoreTest {
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
                 .build());
 
-//        clinVarMap.put(positionFarOutOfBoundariesPlus, AlleleProto.ClinVar.newBuilder()
-//                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
-//                .build());
+        clinVarMap.put(positionFarOutOfBoundariesPlus, AlleleProto.ClinVar.newBuilder()
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                .build());
 
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230,1230), "T", "A")
@@ -283,7 +283,7 @@ class ClinVarDaoMvStoreTest {
 
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
         assertThat(result.isEmpty(), is(true));
         assertThat(result.size(), is(0));
 
@@ -297,7 +297,7 @@ class ClinVarDaoMvStoreTest {
 
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
-        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
+        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
         assertThat(result.isEmpty(), is(true));
         assertThat(result.size(), is(0));
 
