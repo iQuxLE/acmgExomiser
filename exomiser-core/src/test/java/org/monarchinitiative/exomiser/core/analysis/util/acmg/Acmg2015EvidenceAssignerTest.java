@@ -102,6 +102,15 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("G")
             .build();
 
+    // mockVariants
+
+    private AlleleProto.AlleleKey variant6Chr11Pos123276893 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(11)
+            .setPosition(123276893)
+            .setRef("T")
+            .setAlt("A")
+            .build();
+
     private final AlleleProto.ClinVar clinVarPathogenicStarRating2 = AlleleProto.ClinVar.newBuilder()
             .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
             .setReviewStatus("criteria provided, multiple submitters, no conflicts")
@@ -117,6 +126,18 @@ class Acmg2015EvidenceAssignerTest {
             .setReviewStatus("criteria provided, multiple submitters, no conflicts")
             .build();
 
+    /* how about mock for PS1/PM5:
+    Needs to be mocked data - perhaps all in one big test?
+    - different chr everything else to hit
+    - different codon everything else to hit
+    - no missense everything else to hit
+    - no pathogenic everything else to hit
+    - no starRating everything else to hit
+    ->  not testing cDNA and proteinChange cause for that is covered by real data
+        and positional info in both makes mismatch unlikely (c.1977T>C)(p.Lys123Ser)
+     */
+
+
 
     private final MVStore mvStore = new MVStore.Builder().compress().open();
 
@@ -128,6 +149,7 @@ class Acmg2015EvidenceAssignerTest {
 
     private final JannovarVariantAnnotator jannovarAnnotator = new JannovarVariantAnnotator(TestFactory.getDefaultGenomeAssembly(), TestFactory
             .buildDefaultJannovarData(), ChromosomalRegionIndex.empty());
+
     @Test
     void testAssignPS1_SamePositionSameNucleotideSameProteinChangeDifferentCdna() {
         TestVariantDataService variantDataService = TestVariantDataService.builder()
@@ -135,8 +157,10 @@ class Acmg2015EvidenceAssignerTest {
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //match
                 .put(variant3Chr10Pos123276892, clinVarPathogenicStarRating2)
-                // no match cause same cdna
+                // PS1 no match cause same cdna, PM5 no match cause same proteinChange
                 .put(variant4Chr10Pos123276893, clinVarPathogenicStarRating2)
+                // no match cause wrong codon
+                .put(variant1bChr10Pos123247514, clinVarPathogenicStarRating2)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
@@ -154,19 +178,21 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(true));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(instance.getProcessedVariantCount(), is(1));
     }
 
     @Test
-    void testAssignPS1_mockedInputcDNAchange_oneMismatchTwoHitChr10Pos123276893() {
+    void testAssignPS1_mockedInputcDNAchange_TwoHitChr10Pos123276893() {
         TestVariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //match
                 .put(variant3Chr10Pos123276892, clinVarPathogenicStarRating2)
-                // match cause of mocked input cDNA change
+                // PS1 match cause of mocked input cDNA change, PM5 no match cause proteinChange equals
                 .put(variant4Chr10Pos123276893, clinVarPathogenicStarRating2)
                 .build();
 
@@ -185,20 +211,22 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(true));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(instance.getProcessedVariantCount(), is(2));
     }
     @Test
-    void testAssignPS1_mockedInputcDNAchange_oneMismatchTwoHitChr10Pos123247514() {
+    void testAssignPS1andPM5_TwoHitsassignPM1andOneHitPM5Chr10Pos123247514() {
         TestVariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                //no - match cause same cDNA
+                //match for PS1 cause different cDNA and same proteinChange
                 .put(variant1aChr10Pos123247514, clinVarPathogenicStarRating2)
-                // match
+                // match for PS1 cause different cDNA and same proteinChange
                 .put(variant1bChr10Pos123247514, clinVarPathogenicStarRating2)
-                // match (mocked variant)
+                // match for PM5 (mocked variant) cause different/new proteinChange - does not hit PS1 cause of same reason
                 .put(variant2Chr10Pos123247515, clinVarPathogenicStarRating2)
                 .build();
 
@@ -217,20 +245,24 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
-        assertThat(instance.getProcessedVariantCount(), is(2));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(true));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(true));
+        assertThat(instance.getProcessedVariantCount(), is(3));
     }
 
     @Test
-    void testAssignPS1_completeMismatchDifferentChromosomeAndDifferentCodon() {
+    void testAssignPS1orPM5_completeMismatchNoHitDifferentChromosomeAndDifferentCodon() {
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
                 //no match different Codon
                 .put(variant1bChr10Pos123247514, clinVarPathogenicStarRating2)
-                // no match wrong chromosome
+                // no match wrong Chromosome
                 .put(variant5Chr11Pos108124619, clinVarPathogenicStarRating2)
+                // no match wrong Chromosome but right position
+                .put(variant6Chr11Pos123276893, clinVarPathogenicStarRating2)
                 .build();
 
         Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator,variantDataService);
@@ -248,41 +280,11 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(false));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(instance.getProcessedVariantCount(), is(0));
-    }
-
-    @Test
-    void testAssignPS1_sameCodonDifferentNucleotideSameProteinChangeDifferentCdna() {
-        TestVariantDataService variantDataService = TestVariantDataService.builder()
-                .setMVStore(mvStore)
-                .setGenomeAssembly(GenomeAssembly.HG19)
-                //sameCodonDifferentNucleotideDifferentCdnaSameProteinChange = match
-                .put(variant3Chr10Pos123276892, clinVarPathogenicStarRating2)
-                //DifferentCodonDifferentCdnaDifferentProteinChange - no match
-                .put(variant1bChr10Pos123247514, clinVarPathogenicStarRating2)
-                .build();
-
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
-
-        TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
-                .variantEffect(VariantEffect.MISSENSE_VARIANT)
-                .hgvsProtein("p.(Cys342Ser)")
-                .hgvsCdna("c.1024T>A")
-                .build();
-
-        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276893, "T", "A")
-                .geneSymbol("FGFR2")
-                .variantEffect(VariantEffect.MISSENSE_VARIANT)
-                .annotations(List.of(transcriptAnnotation))
-                .build();
-
-
-        AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
-        assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
-        assertThat(instance.getProcessedVariantCount(), is(1));
     }
 
     @Test
@@ -310,8 +312,10 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(false));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(instance.getProcessedVariantCount(), is(0));
     }
 
@@ -340,8 +344,10 @@ class Acmg2015EvidenceAssignerTest {
 
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(false));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(instance.getProcessedVariantCount(), is(0));
     }
 
@@ -370,8 +376,10 @@ class Acmg2015EvidenceAssignerTest {
 
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1(builder, variantEvaluation);
+        instance.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(false));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(instance.getProcessedVariantCount(), is(0));
     }
 

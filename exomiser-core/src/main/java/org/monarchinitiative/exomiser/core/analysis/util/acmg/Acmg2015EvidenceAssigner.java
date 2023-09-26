@@ -150,7 +150,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         }
 
         if (hasVariantAnnotator() && hasVariantDataService()) {
-            assignPS1(acmgEvidenceBuilder, variantEvaluation);
+            assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
         }
 
 
@@ -283,7 +283,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
     /**
      * PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
      */
-    public void assignPS1(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
+    public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
         String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
         String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
@@ -323,12 +323,17 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                             TranscriptAnnotation transcriptAnnotationFromEntriesInRange = variantAnnotation.getTranscriptAnnotations().get(0);
                             String cdnaChangeFromProto = transcriptAnnotationFromEntriesInRange.getHgvsCdna();
 
-                            logger.debug("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
-                            logger.debug("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
+                            logger.info("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
+                            logger.info("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
 
                             if (proteinChangeFromInput.equals(proteinChangeFromProto) && !cdnaChangeFromInput.equals(cdnaChangeFromProto) && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
                                 processedVariantCount++;
                                 acmgEvidenceBuilder.add(PS1);
+                            }
+                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)
+                                    && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                                acmgEvidenceBuilder.add(PM5);
+                                processedVariantCount++;
                             }
                         }
                     }
@@ -337,7 +342,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         }
     }
 
-    public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
+    public void assignPS1orPM5ff(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
         String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
         String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
