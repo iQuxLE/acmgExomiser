@@ -41,7 +41,6 @@ public class MvStoreUtil {
     private static final Logger logger = LoggerFactory.getLogger(MvStoreUtil.class);
     private static final String ALLELE_MAP_NAME = "alleles";
     private static final String CLINVAR_MAP_NAME = "clinvar";
-
     private MvStoreUtil() {
         //static utility class - not instantiable
     }

@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -117,6 +118,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
      * @param compatibleDiseaseMatches
      * @return
      */
+//    variantDataService.getMvStore() != null
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/464/ - check in ClinVar VCF if there is MOI information for a classification
     public AcmgEvidence assignVariantAcmgEvidence(VariantEvaluation variantEvaluation, ModeOfInheritance modeOfInheritance, List<VariantEvaluation> contributingVariants, List<Disease> knownDiseases, List<ModelPhenotypeMatch<Disease>> compatibleDiseaseMatches) {
         // try strict ACMG assignments only if there are known disease-gene associations
@@ -135,7 +137,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
         // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
         // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
-        assignPS1(acmgEvidenceBuilder, variantEvaluation);
+//        assignPS1(acmgEvidenceBuilder, variantEvaluation);
 
         if (pedigree.containsId(probandId)) {
             Individual proband = pedigree.getIndividualById(probandId);
@@ -146,6 +148,11 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             // BS4 "Lack of segregation in affected members of a family"
             assignBS4(acmgEvidenceBuilder, variantEvaluation, proband);
         }
+
+        if (hasVariantAnnotator() && hasVariantDataService()) {
+            assignPS1(acmgEvidenceBuilder, variantEvaluation);
+        }
+
 
         FrequencyData frequencyData = variantEvaluation.getFrequencyData();
         // PM2 "Absent from controls (or at extremely low frequency if recessive) in Exome Sequencing Project, 1000 Genomes Project, or Exome Aggregation Consortium"
@@ -176,6 +183,13 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         assignPP3orBP4(acmgEvidenceBuilder, pathogenicityData);
 
         return acmgEvidenceBuilder.build();
+    }
+
+    private boolean hasVariantDataService(){
+        return variantDataService != null;
+    }
+    private boolean hasVariantAnnotator(){
+        return variantAnnotator != null;
     }
 
     /**

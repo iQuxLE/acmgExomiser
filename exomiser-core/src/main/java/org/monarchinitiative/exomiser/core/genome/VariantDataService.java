@@ -44,9 +44,7 @@ import java.util.Set;
 public interface VariantDataService {
 
     public boolean variantIsWhiteListed(Variant variant);
-
     public FrequencyData getVariantFrequencyData(Variant variant, Set<FrequencySource> frequencySources);
-
     public PathogenicityData getVariantPathogenicityData(Variant variant, Set<PathogenicitySource> pathogenicitySources);
     public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval);
 
