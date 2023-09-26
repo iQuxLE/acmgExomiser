@@ -337,7 +337,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         }
     }
 
-    public void assignPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
+    public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
         String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
         String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
@@ -376,7 +376,13 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                             logger.debug("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
                             logger.debug("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
 
-                            if (!proteinChangeFromInput.equals(proteinChangeFromProto) && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                            if (proteinChangeFromInput.equals(proteinChangeFromProto)
+                                    && !cdnaChangeFromInput.equals(cdnaChangeFromProto)
+                                    && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                                processedVariantCount++;
+                                acmgEvidenceBuilder.add(PS1);
+                            } else if (!proteinChangeFromInput.equals(proteinChangeFromProto)
+                                    && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
                                 acmgEvidenceBuilder.add(PM5);
                                 processedVariantCount++;
                             }
