@@ -341,20 +341,17 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
         String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
         String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
-        logger.info("Input: " + transcriptAnnotation.getVariantEffect());
-        logger.info("Input: " + variantAnnotator.annotate(variantEvaluation));
+        logger.debug("Input: " + transcriptAnnotation.getVariantEffect());
+        logger.debug("Input: " + variantAnnotator.annotate(variantEvaluation));
         if (variantEvaluation.hasTranscriptAnnotations() && transcriptAnnotation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT) {
             Map<GenomicVariant, ClinVarData> cvData = variantDataService.findClinVarDataOverlappingGenomicInterval(variantEvaluation);
-            logger.info("" + cvData);
+            logger.debug("" + cvData);
 
             for (Map.Entry<GenomicVariant, ClinVarData> entry : cvData.entrySet()) {
 
                 ClinVarData.ClinSig clinicalSignificance = entry.getValue().getPrimaryInterpretation();
-                if
-                (clinicalSignificance != null
-                        && clinicalSignificance == ClinVarData.ClinSig.PATHOGENIC
-                        || clinicalSignificance == ClinVarData.ClinSig.PATHOGENIC_OR_LIKELY_PATHOGENIC
-                        || clinicalSignificance == ClinVarData.ClinSig.LIKELY_PATHOGENIC) {
+                int starRating = entry.getValue().starRating();
+                if (isPathOrLikelyPath(clinicalSignificance) && starRating >= 2) {
 
                     String alt = entry.getKey().alt();
                     String ref = entry.getKey().ref();
@@ -371,16 +368,15 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
                         if (variantAnnotation.hasTranscriptAnnotations()) {
                             VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
-                            logger.info("Proto: " + variantEffectFromVariantStore);
+                            logger.debug("Proto: " + variantEffectFromVariantStore);
                             String proteinChangeFromProto = variantAnnotation.getTranscriptAnnotations().get(0).getHgvsProtein();
                             TranscriptAnnotation transcriptAnnotationFromEntriesInRange = variantAnnotation.getTranscriptAnnotations().get(0);
                             String cdnaChangeFromProto = transcriptAnnotationFromEntriesInRange.getHgvsCdna();
 
-                            logger.info("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
-                            logger.info("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
+                            logger.debug("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
+                            logger.debug("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
 
-                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)
-                                    && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                            if (!proteinChangeFromInput.equals(proteinChangeFromProto) && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
                                 acmgEvidenceBuilder.add(PM5);
                                 processedVariantCount++;
                             }
@@ -390,7 +386,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             }
         }
     }
-
 
     // helper to keep track of variants running through tests assignPS1
     public int getProcessedVariantCount() {
