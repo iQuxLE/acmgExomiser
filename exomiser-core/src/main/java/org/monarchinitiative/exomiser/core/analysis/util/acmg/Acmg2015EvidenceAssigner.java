@@ -287,8 +287,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
         String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
         String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
-        logger.debug("Input: " + transcriptAnnotation.getVariantEffect());
-        logger.debug("Input: " + variantAnnotator.annotate(variantEvaluation));
+        logger.info("Input: " + transcriptAnnotation.getVariantEffect());
+        logger.info("Input: " + variantAnnotator.annotate(variantEvaluation));
         if (variantEvaluation.hasTranscriptAnnotations() && transcriptAnnotation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT) {
             Map<GenomicVariant, ClinVarData> cvData = variantDataService.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2, 2));
             logger.debug("" + cvData);
@@ -296,9 +296,9 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             for (Map.Entry<GenomicVariant, ClinVarData> entry : cvData.entrySet()) {
 
                 ClinVarData.ClinSig clinicalSignificance = entry.getValue().getPrimaryInterpretation();
-                logger.debug("" + clinicalSignificance);
+                logger.info("" + clinicalSignificance);
                 int starRating = entry.getValue().starRating();
-                logger.debug("" + starRating);
+                logger.info("" + starRating);
 
                 if (isPathOrLikelyPath(clinicalSignificance) && starRating >= 2) {
 
@@ -314,7 +314,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                     if (!annotatedVariantList.isEmpty()) {
 
                         VariantAnnotation variantAnnotation = annotatedVariantList.get(0);
-                        logger.debug("" + variantAnnotation);
+                        logger.info("Proto: " + variantAnnotation);
 
                         if (variantAnnotation.hasTranscriptAnnotations()) {
                             VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
