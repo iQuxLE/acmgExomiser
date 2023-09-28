@@ -87,6 +87,29 @@ public class JannovarVariantAnnotatorTest {
     }
 
     @Test
+    void testAnnotateMissenseVariantCarlo() {
+        // This transcript is on the negative strand
+        // TranscriptModel Gene=FGFR2 accession=uc021pzz.1 Chr10 Strand=- seqLen=4654
+        // txRegion=123237843-123357972(120129 bases) CDS=123239370-123353331(113961 bases)
+        List<VariantAnnotation> annotations = annotate(instance, "10", 123256215, "T", "G");
+        assertThat(annotations.size(), equalTo(1));
+
+        VariantAnnotation variantAnnotation = annotations.get(0);
+
+        assertThat(variantAnnotation.getGeneId(), equalTo("2263"));
+        assertThat(variantAnnotation.getGeneSymbol(), equalTo("FGFR2"));
+        assertThat(variantAnnotation.getVariantEffect(), equalTo(VariantEffect.MISSENSE_VARIANT));
+        assertThat(variantAnnotation.hasTranscriptAnnotations(), is(true));
+        TranscriptAnnotation transcriptAnnotation = variantAnnotation.getTranscriptAnnotations().get(0);
+        assertThat(transcriptAnnotation.getGeneSymbol(), equalTo("FGFR2"));
+        assertThat(transcriptAnnotation.getAccession(), equalTo("uc021pzz.1"));
+        assertThat(transcriptAnnotation.getDistanceFromNearestGene(), equalTo(0));
+        assertThat(transcriptAnnotation.getHgvsGenomic(), equalTo("g.12278533A>C"));
+        assertThat(transcriptAnnotation.getHgvsCdna(), equalTo("c.1694A>C"));
+        assertThat(transcriptAnnotation.getHgvsProtein(), equalTo("p.(Glu565Ala)"));
+    }
+
+    @Test
     void testAnnotateSpliceAcceptorVariant() {
         // This transcript is on the negative strand
         // TranscriptModel Gene=FGFR2 accession=uc021pzz.1 Chr10 Strand=- seqLen=4654

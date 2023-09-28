@@ -58,48 +58,48 @@ class Acmg2015EvidenceAssignerTest {
     private AlleleProto.AlleleKey variant1aChr10Pos123247514 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
-            .setRef("G")
-            .setAlt("T")
+            .setRef("T")
+            .setAlt("G")
             .build();
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/
     private AlleleProto.AlleleKey variant1bChr10Pos123247514 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
-            .setRef("G")
-            .setAlt("C")
+            .setRef("C")
+            .setAlt("G")
             .build();
 
     // mocked Variant
     private AlleleProto.AlleleKey variant2Chr10Pos123247515 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247515)
-            .setRef("C")
-            .setAlt("T")
+            .setRef("T")
+            .setAlt("C")
             .build();
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
     private AlleleProto.AlleleKey variant3Chr10Pos123276892 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123276892)
-            .setRef("G")
-            .setAlt("C")
+            .setRef("C")
+            .setAlt("G")
             .build();
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
     private AlleleProto.AlleleKey variant4Chr10Pos123276893 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123276893)
-            .setRef("T")
-            .setAlt("A")
+            .setRef("A")
+            .setAlt("T")
             .build();
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/689498/
     private AlleleProto.AlleleKey variant5Chr11Pos108124619 = AlleleProto.AlleleKey.newBuilder()
             .setChr(11)
             .setPosition(299372)
-            .setRef("C")
-            .setAlt("G")
+            .setRef("G")
+            .setAlt("C")
             .build();
 
     // mockVariants
@@ -107,8 +107,81 @@ class Acmg2015EvidenceAssignerTest {
     private AlleleProto.AlleleKey variant6Chr11Pos123276893 = AlleleProto.AlleleKey.newBuilder()
             .setChr(11)
             .setPosition(123276893)
+            .setRef("A") //T
+            .setAlt("T") //A
+            .build();
+
+
+    //    https://www.ncbi.nlm.nih.gov/clinvar/variation/1317030/
+    private final AlleleProto.AlleleKey variant7Chr10Pos123245027 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123245027)
             .setRef("T")
+            .setAlt("C")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13264/
+    private final AlleleProto.AlleleKey variant8Chr10Pos123276899 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276899)
+            .setRef("A")
+            .setAlt("G")
+            .build();
+
+    //https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
+    private final AlleleProto.AlleleKey variant9Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276856)
+            .setRef("G")
             .setAlt("A")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
+    private final AlleleProto.AlleleKey variant11Chr10Pos123245026 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123245026)
+            .setRef("A")
+            .setAlt("G")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
+    private final AlleleProto.AlleleKey variant10Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276856)
+            .setRef("G")
+            .setAlt("C")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/374819/
+    private final AlleleProto.AlleleKey variant12Chr10Pos123276892 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276892)
+            .setRef("C")
+            .setAlt("A")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
+    private final AlleleProto.AlleleKey variant13Chr10Pos123276892 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276892)
+            .setRef("C")
+            .setAlt("G")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13275/
+    private final AlleleProto.AlleleKey variant14Chr10Pos123276893 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276891)
+            .setRef("G")
+            .setAlt("C")
+            .build();
+
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
+    private final AlleleProto.AlleleKey variant15Chr10Pos123276891 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(10)
+            .setPosition(123276893)
+            .setRef("A")
+            .setAlt("T")
             .build();
 
     private final AlleleProto.ClinVar clinVarPathogenicStarRating2 = AlleleProto.ClinVar.newBuilder()
@@ -130,20 +203,6 @@ class Acmg2015EvidenceAssignerTest {
             .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.UNCERTAIN_SIGNIFICANCE)
             .setReviewStatus("criteria provided, multiple submitters, no conflicts")
             .build();
-
-
-
-    /* how about mock for PS1/PM5:
-    Needs to be mocked data - perhaps all in one big test?
-    - different chr everything else to hit
-    - different codon everything else to hit
-    - no missense everything else to hit
-    - no pathogenic everything else to hit
-    - no starRating everything else to hit
-    ->  not testing cDNA and proteinChange cause for that is covered by real data
-        and positional info in both makes mismatch unlikely (c.1977T>C)(p.Lys123Ser)
-     */
-
 
 
     private final MVStore mvStore = new MVStore.Builder().compress().open();
@@ -390,99 +449,13 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(instance.getProcessedVariantCount(), is(0));
     }
 
-//    https://www.ncbi.nlm.nih.gov/clinvar/variation/1317030/
-    private final AlleleProto.AlleleKey variant7Chr10Pos123245027 = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123245027)
-            .setRef("A")
-            .setAlt("G")
-            .build();
-
-    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13264/
-    private final AlleleProto.AlleleKey variant8Chr10Pos123276899 = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276899)
-            .setRef("T")
-            .setAlt("C")
-            .build();
-
-    //https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
-    private final AlleleProto.AlleleKey variant9Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276856)
-            .setRef("T")
-            .setAlt("C")
-            .build();
-
-    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
-    private final AlleleProto.AlleleKey variant10Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276856)
-            .setRef("C")
-            .setAlt("G")
-            .build();
-
-//    private final AlleleProto.AlleleKey x = AlleleProto.AlleleKey.newBuilder()
-//            .setChr(10)
-//            .setPosition(123276893-123276894)
-//            .setRef("T")
-//            .setAlt("C")
-//            .build();
-
-    private final AlleleProto.AlleleKey mock = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276899)
-            .setRef("T")
-            .setAlt("C")
-            .build();
-
-    private final AlleleProto.AlleleKey mock1 = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276899)
-            .setRef("T")
-            .setAlt("C")
-            .build();
-
-
-
-
-
-
-    // pick     // NM_000141.5(FGFR2):c.1025G>A (p.Cys342Tyr) https://www.ncbi.nlm.nih.gov/clinvar/variation/13263/
-    // pick     // NM_000141.5(FGFR2):c.1023_1024delinsAG (p.Cys342Gly) (check what happens for both) https://www.ncbi.nlm.nih.gov/clinvar/variation/2131381/
-    // pick  NM_000141.5(FGFR2):c.1061C>T (p.Ser354Phe) https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
-    // pick NM_000141.5(FGFR2):c.1018T>C (p.Tyr340His) https://www.ncbi.nlm.nih.gov/clinvar/variation/13264/ 2star
-    // pick // NM_000141.5(FGFR2):c.2152G>A (p.Glu718Lys) for uncertains significance https://www.ncbi.nlm.nih.gov/clinvar/variation/649790/ 1star
-
-     // strong pick as VarEval NM_000141.5(FGFR2):c.2078T>C (p.Met693Thr) 1star// https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
-    // --> and check for this in proto NM_000141.5(FGFR2):c.2077A>G (p.Met693Val) cause 2 star but uncertainsignificance https://www.ncbi.nlm.nih.gov/clinvar/variation/1317030/
-
-    // NM_000141.5(FGFR2):c.1061C>T (p.Ser354Phe) https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
-    // NM_000141.5(FGFR2):c.1061C>G (p.Ser354Cys) https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
-    // NM_000141.5(FGFR2):c.1023_1024delinsAG (p.Cys342Gly) --> check that for PS1 --> https://www.ncbi.nlm.nih.gov/clinvar/variation/2131381/ starRAting1
-    // NM_000141.5(FGFR2):c.1024T>G (p.Cys342Gly) https://www.ncbi.nlm.nih.gov/clinvar/variation/374818/
-    // NM_000141.5(FGFR2):c.1024T>A (p.Cys342Ser) https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
-    // NM_000141.5(FGFR2):c.1025G>A (p.Cys342Tyr) https://www.ncbi.nlm.nih.gov/clinvar/variation/13263/
-    // NM_000141.5(FGFR2):c.1025G>T (p.Cys342Phe) https://www.ncbi.nlm.nih.gov/clinvar/variation/374819/
-    //NM_000141.5(FGFR2):c.1025G>C (p.Cys342Ser) https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
-    // NM_000141.5(FGFR2):c.1026C>G (p.Cys342Trp) https://www.ncbi.nlm.nih.gov/clinvar/variation/13275/
-
-    // NM_000141.5(FGFR2):c.1018T>C (p.Tyr340His) https://www.ncbi.nlm.nih.gov/clinvar/variation/13264/
-    // NM_000141.5(FGFR2):c.1019A>G (p.Tyr340Cys) https://www.ncbi.nlm.nih.gov/clinvar/variation/449398/
-
-    //     void testAssignPM5_SamePositionSameNucleotideSameProteinChangeDifferentCdna() --> pure hit PM5
-    //     void testAssignPM5_mockedInputcDNAchange_TwoHitChr10Pos123276893() { --> more than one hit PM5 (mocked)
-    //     void testAssignPS1orPM5_completeMismatchNoHitDifferentChromosomeAndDifferentCodon() { --> add PM5 hit (would hit)
-    //     void testAssignPM5_NoMissense() {
-    //     void testAssignPM5_NotPathogenicSameCodonStarRating1() {
-    //    void testAssignPM5_mocked_starRating1() {
-
     @Test
-    void testAssignPM5_SamePositionSameNucleotidDifferentProteinChange(){
+    void testAssignPM5_SamePositionSameNucleotidDifferentProteinChangeChr10Pos123276856(){
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                //match
+                .put(variant9Chr10Pos123276856, clinVarPathogenicStarRating2)
+                //no match - cause same protein change
                 .put(variant10Chr10Pos123276856, clinVarPathogenicStarRating2)
                 .build();
 
@@ -490,11 +463,12 @@ class Acmg2015EvidenceAssignerTest {
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
-                .hgvsProtein("p.(Ser354Phe)")
-                .hgvsCdna("c.1061C>T")
+                .hgvsProtein("p.(Ser354Cys)")
+                .hgvsCdna("c.1061C>G")
                 .build();
+
         // NM_000141.5(FGFR2):c.1061C>G (p.Ser354Cys)  https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
-        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276856, "C", "T")
+        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276856, "G", "C")
                 .geneSymbol("FGFR2")
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
                 .annotations(List.of(transcriptAnnotation))
@@ -509,23 +483,27 @@ class Acmg2015EvidenceAssignerTest {
     }
 
     @Test
-    void testAssignPM5_SamePositionSameNucleotidDifferentProteinChangeWEIRD(){
+    void testAssignPM5_SamePositionSameNucleotidDifferentProteinChangeChr10Pos123276892(){
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                //match
-                .put(variant9Chr10Pos123276856, clinVarPathogenicStarRating2)
+                // all match ( remember when going over this if we only need the codon so we actually need a real codon check for stuff like that ? ) or does it not matter cause swapping posis after changes?
+                .put(variant12Chr10Pos123276892, clinVarPathogenicStarRating2)
+                .put(variant13Chr10Pos123276892, clinVarPathogenicStarRating2)
+                .put(variant14Chr10Pos123276893, clinVarPathogenicStarRating2)
+                .put(variant15Chr10Pos123276891, clinVarPathogenicStarRating2)
                 .build();
 
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
-                .hgvsProtein("p.(Ser354Cys)")
-                .hgvsCdna("c.1061C>G")
+                .hgvsProtein("p.(Cys342Tyr)")
+                .hgvsCdna("c.1025G>A")
                 .build();
-        // NM_000141.5(FGFR2):c.1061C>G (p.Ser354Cys)  https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
-        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276856, "G", "C")
+
+        // NM_000141.5(FGFR2):c.1025G>A (p.Cys342Tyr) https://www.ncbi.nlm.nih.gov/clinvar/variation/13263/
+        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123276892, "C", "T")
                 .geneSymbol("FGFR2")
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
                 .annotations(List.of(transcriptAnnotation))
@@ -536,7 +514,39 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(true));
-        assertThat(assigner.getProcessedVariantCount(), is(1));
+        assertThat(assigner.getProcessedVariantCount(), is(4));
+    }
+
+    @Test
+    void testAssignPM5_dontFindSamePositionSameProteinChange(){
+        VariantDataService variantDataService = TestVariantDataService.builder()
+                .setMVStore(mvStore)
+                .setGenomeAssembly(GenomeAssembly.HG19)
+                //no match
+                .put(variant11Chr10Pos123245026, clinVarPathogenicStarRating2)
+                .build();
+
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .hgvsProtein("p.(Met693Thr)")
+                .hgvsCdna("c.2078T>C")
+                .build();
+
+        // NM_000141.5(FGFR2):c.2078T>C (p.Met693Thr)  https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
+        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123245026, "A", "G")
+                .geneSymbol("FGFR2")
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .annotations(List.of(transcriptAnnotation))
+                .build();
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(false));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(false));
+        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -555,6 +565,7 @@ class Acmg2015EvidenceAssignerTest {
                 .hgvsProtein("p.(Met693Thr)")
                 .hgvsCdna("c.2078T>C")
                 .build();
+
         // NM_000141.5(FGFR2):c.2078T>C (p.Met693Thr)  https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123245026, "T", "C")
                 .geneSymbol("FGFR2")
@@ -588,7 +599,7 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         // NM_000141.5(FGFR2):c.2078T>C (p.Met693Thr) https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
-        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123245026, "T", "C")
+        VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 123245026, "A", "G")
                 .geneSymbol("FGFR2")
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
                 .annotations(List.of(transcriptAnnotation))

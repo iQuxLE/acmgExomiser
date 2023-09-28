@@ -309,7 +309,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
                     List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(VariantEvaluation.builder()
                             // Assembly.HG19?
-                            .variant(GenomeAssembly.HG19.getContigById(chr), Strand.POSITIVE, Coordinates.oneBased(pos, pos), alt, ref).build());
+                            .variant(GenomeAssembly.HG19.getContigById(chr), Strand.POSITIVE, Coordinates.oneBased(pos, pos), ref, alt).build());
 
                     if (!annotatedVariantList.isEmpty()) {
 
