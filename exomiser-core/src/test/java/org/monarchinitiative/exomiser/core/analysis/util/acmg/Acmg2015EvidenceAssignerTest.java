@@ -221,7 +221,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant1bChr10Pos123247514, clinVarPathogenicStarRating2)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
@@ -236,11 +236,11 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(true));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(instance.getProcessedVariantCount(), is(1));
+        assertThat(assigner.getProcessedVariantCount(), is(1));
     }
 
     @Test
@@ -254,7 +254,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant4Chr10Pos123276893, clinVarPathogenicStarRating2)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
@@ -269,11 +269,11 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(true));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(instance.getProcessedVariantCount(), is(2));
+        assertThat(assigner.getProcessedVariantCount(), is(2));
     }
     @Test
     void testAssignPS1andPM5_TwoHitsassignPM1andOneHitPM5Chr10Pos123247514() {
@@ -288,7 +288,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant2Chr10Pos123247515, clinVarPathogenicStarRating2)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
@@ -303,11 +303,11 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(true));
         assertThat(builder.contains(AcmgCriterion.PM5), is(true));
-        assertThat(instance.getProcessedVariantCount(), is(3));
+        assertThat(assigner.getProcessedVariantCount(), is(3));
     }
 
     @Test
@@ -323,7 +323,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant6Chr11Pos123276893, clinVarPathogenicStarRating2)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator,variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator,variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
@@ -338,11 +338,11 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(instance.getProcessedVariantCount(), is(0));
+        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -355,7 +355,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant2Chr10Pos123247515, clinVarPathogenicStarRating2)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.START_LOST) // this is a fake START_LOST, the real on this position is MISSENSE
@@ -370,11 +370,11 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(instance.getProcessedVariantCount(), is(0));
+        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -386,7 +386,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant2Chr10Pos123247515, clinVarBenignStarRating2)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
@@ -402,11 +402,11 @@ class Acmg2015EvidenceAssignerTest {
 
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(instance.getProcessedVariantCount(), is(0));
+        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -418,7 +418,7 @@ class Acmg2015EvidenceAssignerTest {
                 .put(variant2Chr10Pos123247515, clinVarPathogenicStarRating1)
                 .build();
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.MISSENSE_VARIANT)
@@ -434,11 +434,11 @@ class Acmg2015EvidenceAssignerTest {
 
 
         AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        instance.assignPS1orPM5(builder, variantEvaluation);
+        assigner.assignPS1orPM5(builder, variantEvaluation);
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(instance.getProcessedVariantCount(), is(0));
+        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
