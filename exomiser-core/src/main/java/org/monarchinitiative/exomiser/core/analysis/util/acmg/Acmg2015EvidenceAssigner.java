@@ -282,6 +282,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
     /**
      * PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
+     * PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
