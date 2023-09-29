@@ -120,14 +120,6 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("C")
             .build();
 
-    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13264/
-    private final AlleleProto.AlleleKey variant8Chr10Pos123276899 = AlleleProto.AlleleKey.newBuilder()
-            .setChr(10)
-            .setPosition(123276899)
-            .setRef("A")
-            .setAlt("G")
-            .build();
-
     //https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
     private final AlleleProto.AlleleKey variant9Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
