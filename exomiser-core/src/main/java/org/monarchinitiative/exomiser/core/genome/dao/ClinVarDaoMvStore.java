@@ -4,7 +4,6 @@ import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
 import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.VariantStoreDao;
 import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
 import org.monarchinitiative.exomiser.core.model.Variant;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
