@@ -73,21 +73,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
     private final Individual.Sex probandSex;
     private final Pedigree pedigree;
 
-    private VariantDataService variantDataService;
-    private VariantAnnotator variantAnnotator;
-
-    private int processedVariantCount = 0;
-
-
-    public Acmg2015EvidenceAssigner(String probandId, Pedigree pedigree) {
-        this.probandId = Objects.requireNonNull(probandId);
-        this.pedigree = pedigree == null || pedigree.isEmpty() ? Pedigree.justProband(probandId) : pedigree;
-        Individual proband = this.pedigree.getIndividualById(probandId);
-        if (proband == null) {
-            throw new IllegalArgumentException("Proband '" + probandId + "' not found in pedigree " + pedigree);
-        }
-        this.probandSex = proband.getSex();
-    }
+    private final VariantDataService variantDataService;
+    private final VariantAnnotator variantAnnotator;
 
     public Acmg2015EvidenceAssigner(String probandId, Pedigree pedigree, VariantAnnotator variantAnnotator, VariantDataService variantDataService) {
         this.probandId = Objects.requireNonNull(probandId);
@@ -137,9 +124,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
         // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
         // PM5: "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
-        if (hasVariantAnnotator() && hasVariantDataService()) {
-            assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
-        }
+        assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
+
 
         if (pedigree.containsId(probandId)) {
             Individual proband = pedigree.getIndividualById(probandId);
@@ -282,7 +268,14 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
      * PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
-        TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
+        List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
+        // this catches early mistake but also hacks and makes sure that in tests when for example PS2 is called and the transcriptAnnotation is not given this breaks early and does not call the function
+        // but still mvStore is not really empty ...
+        if (annotations == null || annotations.isEmpty()){
+            logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
+            return;
+        }
+        TranscriptAnnotation transcriptAnnotation = annotations.get(0);
         String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
         String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
         logger.debug("Input: " + transcriptAnnotation.getVariantEffect());
@@ -337,12 +330,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             }
         }
     }
-
-    // helper to keep track of variants running through tests assignPS1
-    public int getProcessedVariantCount() {
-        return processedVariantCount;
-    }
-
 
     /**
      * PM3 "For recessive disorders, detected in trans with a pathogenic variant"

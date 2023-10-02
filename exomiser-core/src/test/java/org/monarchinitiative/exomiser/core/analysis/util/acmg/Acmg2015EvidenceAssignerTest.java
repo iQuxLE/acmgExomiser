@@ -56,12 +56,15 @@ import static org.monarchinitiative.exomiser.core.model.Pedigree.justProband;
 
 class Acmg2015EvidenceAssignerTest {
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/
+    // previously Ref T Alt G (tests were adjusted to that so maybe see if thats a problem )
     private AlleleProto.AlleleKey variant1aChr10Pos123247514 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
             .setPosition(123247514)
-            .setRef("T")
-            .setAlt("G")
+            .setRef("C")
+            .setAlt("A")
             .build();
+
+    // "10-123247514-T-G"     // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/
     private AlleleProto.AlleleKey variant1bChr10Pos123247514 = AlleleProto.AlleleKey.newBuilder()
@@ -70,6 +73,7 @@ class Acmg2015EvidenceAssignerTest {
             .setRef("C")
             .setAlt("G")
             .build();
+    // "10-123247514-C-G"     // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/
 
     // mocked Variant
     private AlleleProto.AlleleKey variant2Chr10Pos123247515 = AlleleProto.AlleleKey.newBuilder()
@@ -79,6 +83,8 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("C")
             .build();
 
+    // "10-123247515-T-C"  //mocked Variant
+
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
     private AlleleProto.AlleleKey variant3Chr10Pos123276892 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
@@ -86,6 +92,9 @@ class Acmg2015EvidenceAssignerTest {
             .setRef("C")
             .setAlt("G")
             .build();
+
+    // "10-123276892-C-G" // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
+
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
     private AlleleProto.AlleleKey variant4Chr10Pos123276893 = AlleleProto.AlleleKey.newBuilder()
@@ -95,6 +104,9 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("T")
             .build();
 
+    // "10-123276893-A-T"            // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
+
+
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/689498/
     private AlleleProto.AlleleKey variant5Chr11Pos108124619 = AlleleProto.AlleleKey.newBuilder()
             .setChr(11)
@@ -103,15 +115,19 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("C")
             .build();
 
+    // "10-299372-G-C"            // https://www.ncbi.nlm.nih.gov/clinvar/variation/689498/
+
+
     // mockVariants
 
     private AlleleProto.AlleleKey variant6Chr11Pos123276893 = AlleleProto.AlleleKey.newBuilder()
             .setChr(11)
             .setPosition(123276893)
-            .setRef("A") //T
-            .setAlt("T") //A
+            .setRef("A")
+            .setAlt("T")
             .build();
 
+    // "11-123276893-A-T"    // mockVariants
 
     //    https://www.ncbi.nlm.nih.gov/clinvar/variation/1317030/
     private final AlleleProto.AlleleKey variant7Chr10Pos123245027 = AlleleProto.AlleleKey.newBuilder()
@@ -121,6 +137,8 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("C")
             .build();
 
+    // "10-123245027-T-C"      //    https://www.ncbi.nlm.nih.gov/clinvar/variation/1317030/
+
     //https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
     private final AlleleProto.AlleleKey variant9Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
@@ -128,6 +146,8 @@ class Acmg2015EvidenceAssignerTest {
             .setRef("G")
             .setAlt("A")
             .build();
+
+    // "10-123276856-G-A"     //https://www.ncbi.nlm.nih.gov/clinvar/variation/1066784/
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
     private final AlleleProto.AlleleKey variant11Chr10Pos123245026 = AlleleProto.AlleleKey.newBuilder()
@@ -137,6 +157,8 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("G")
             .build();
 
+    // "10-123245026-A-G"      // https://www.ncbi.nlm.nih.gov/clinvar/variation/2065795/
+
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
     private final AlleleProto.AlleleKey variant10Chr10Pos123276856 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
@@ -144,6 +166,8 @@ class Acmg2015EvidenceAssignerTest {
             .setRef("G")
             .setAlt("C")
             .build();
+
+    // "10-123276856-G-C"     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/374819/
     private final AlleleProto.AlleleKey variant12Chr10Pos123276892 = AlleleProto.AlleleKey.newBuilder()
@@ -153,6 +177,8 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("A")
             .build();
 
+    // "10-123276892-C-A"     // https://www.ncbi.nlm.nih.gov/clinvar/variation/374819/
+
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
     private final AlleleProto.AlleleKey variant13Chr10Pos123276892 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
@@ -160,6 +186,8 @@ class Acmg2015EvidenceAssignerTest {
             .setRef("C")
             .setAlt("G")
             .build();
+
+    // "10-123276892-C-G"      // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
 
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13275/
     private final AlleleProto.AlleleKey variant14Chr10Pos123276893 = AlleleProto.AlleleKey.newBuilder()
@@ -169,6 +197,8 @@ class Acmg2015EvidenceAssignerTest {
             .setAlt("C")
             .build();
 
+    // "10-123276891-G-C"     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13275/
+
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
     private final AlleleProto.AlleleKey variant15Chr10Pos123276891 = AlleleProto.AlleleKey.newBuilder()
             .setChr(10)
@@ -176,6 +206,8 @@ class Acmg2015EvidenceAssignerTest {
             .setRef("A")
             .setAlt("T")
             .build();
+
+    // "10-123276893-A-T"  //     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
 
     private final AlleleProto.ClinVar clinVarPathogenicStarRating2 = AlleleProto.ClinVar.newBuilder()
             .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
@@ -201,9 +233,9 @@ class Acmg2015EvidenceAssignerTest {
     private final MVStore mvStore = new MVStore.Builder().compress().open();
 
     // use that for custom cvInterpret
-    private TestVariantDataService initializeVariantDataserviceWithCustom(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
+    private TestVariantDataService initializeCustomVariantDataservice(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
-                .setEmptyMvStore(mvStore)
+                .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
         for (AlleleProto.AlleleKey alleleKey : alleleKeys){
             builder.put(alleleKey,cvInterpretation);
@@ -213,49 +245,26 @@ class Acmg2015EvidenceAssignerTest {
 
     // for use out of PS1 and PM5 to delete the 2nd constructor
     // all from PVS1 on
-    private TestVariantDataService initializeVariantDataserviceWithEmptyMvStore(){
+    private TestVariantDataService initializeVariantDataservice(){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
-                .setEmptyMvStore(mvStore)
+                .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
         return builder.build();
     }
 
 
-    private VariantEvaluation buildVariantEvaluation(int chr, int pos, String ref, String alt, String hgvs, String cdna, String geneSymbol) {
+    private VariantEvaluation buildVariantEvaluation(int chr, int pos, String ref, String alt, String hgvs, String cdna, String geneSymbol, VariantEffect variantEffect) {
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
-                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .variantEffect(variantEffect)
                 .hgvsProtein(hgvs)
                 .hgvsCdna(cdna)
                 .build();
 
         return TestFactory.variantBuilder(chr, pos, ref, alt)
                 .geneSymbol(geneSymbol)
-                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .variantEffect(variantEffect)
                 .annotations(List.of(transcriptAnnotation))
                 .build();
-    }
-
-
-    @ParameterizedTest
-    @CsvSource({
-            "10-123276892-C-G, true, false",
-            "10-123276893-A-T, true, false",
-            "10-123247514-C-G, false, false"
-
-    })
-    void testAssignPS1_SamePositionSameNucleotideSameProteinChangeDifferentCdna(String variantStr, boolean expectPs1, boolean expectPm5) {
-        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeVariantDataserviceWithCustom(clinVarPathogenicStarRating2, variant);
-        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
-
-        VariantEvaluation variantEvaluation = buildVariantEvaluation(variant.getChr(), variant.getPosition(), variant.getRef(), variant.getAlt(), "p.(Cys342Ser)", "c.1024T>A", "FGFR2");
-
-        AcmgEvidence.Builder builder = AcmgEvidence.builder();
-        assigner.assignPS1orPM5(builder, variantEvaluation);
-        assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
-        assertThat(builder.contains(AcmgCriterion.PS1), is(expectPs1));
-        assertThat(builder.contains(AcmgCriterion.PM5), is(expectPm5));
-        assertThat(assigner.getProcessedVariantCount(), is(1));
     }
 
 
@@ -278,6 +287,128 @@ class Acmg2015EvidenceAssignerTest {
     private final JannovarVariantAnnotator jannovarAnnotator = new JannovarVariantAnnotator(TestFactory.getDefaultGenomeAssembly(), TestFactory
             .buildDefaultJannovarData(), ChromosomalRegionIndex.empty());
 
+
+    @ParameterizedTest
+    @CsvSource({
+            "10-123276892-C-G, true, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ diff cdna, same AAchange
+            "10-123276893-A-T, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/ same cdna + same AAchange
+            "10-123247514-C-A, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/ wrong codon
+            "10-123247514-C-G, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/ wrong codon
+            "10-299372-G-C, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/689498/ wrong chromosome + wrong codon
+            "11-123276893-A-T, false, false" // mocked Variant - wrong chromosome
+
+    })
+    // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
+    void testAssignPS1orPM5againstChr10Pos123276893AT(String variantStr, boolean expectedPs1, boolean expectedPm5) {
+        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
+        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123276893, "A", "T",
+                                                                    "p.(Cys342Ser)", "c.1024T>A", "FGFR2", VariantEffect.MISSENSE_VARIANT);
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.contains(AcmgCriterion.PS1), is(expectedPs1));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "10-123247514-C-A, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/ no match for PS1 cause same cDNA and same proteinChange
+            "10-123247514-C-G, true, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/ match for PS1 cause different cDNA and same proteinChange
+            "10-123247515-T-C, false, true" // mocked Variant - match PM5 cause different/new proteinChange - does not hit PS1 cause of same reason
+
+    })
+
+    void testAssignPS1orPM5againstChr10Pos123247514CA(String variantStr, boolean expectedPs1, boolean expectedPm5) {
+        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
+        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
+                                                                    "p.(Lys659Asn)", "c.1977G>T", "FGFR2", VariantEffect.MISSENSE_VARIANT);
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.contains(AcmgCriterion.PS1), is(expectedPs1));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            // VariantEvaluation is not MISSENSE so no matches
+            "10-123247514-C-A, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/
+            "10-123247514-C-G, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/
+            "10-123247515-T-C, false, false" // mocked Variant
+    })
+
+    void testAssignPS1orPM5VariantEvaluationIsNotMissense(String variantStr, boolean expectedPs1, boolean expectedPm5) {
+        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
+        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
+                "p.(Lys659Asn)", "c.1977G>T", "FGFR2", VariantEffect.START_LOST); //mocked
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.contains(AcmgCriterion.PS1), is(expectedPs1));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            // VariantEvaluation is not MISSENSE so no matches
+            "10-123247514-C-A, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/
+            "10-123247514-C-G, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/
+            "10-123247515-T-C, false, false" // mocked Variant
+
+    })
+
+        // ny now only PS1 add starRating from PM5
+
+
+    void testAssignPS1orPM5NotPathogenic(String variantStr, boolean expectedPs1, boolean expectedPm5) {
+        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
+        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
+                "p.(Lys659Asn)", "c.1977G>T", "FGFR2", VariantEffect.START_LOST); //mocked
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.contains(AcmgCriterion.PS1), is(expectedPs1));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            // VariantEvaluation is not MISSENSE so no matches
+            "10-123247514-C-A, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/
+            "10-123247514-C-G, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/
+            "10-123247515-T-C, false, false" // mocked Variant
+
+    })
+
+    // ny now only PS1 add starRating from PM5
+
+    void testAssignPS1orPM5NoStarRating1(String variantStr, boolean expectedPs1, boolean expectedPm5) {
+        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
+        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
+                "p.(Lys659Asn)", "c.1977G>T", "FGFR2", VariantEffect.START_LOST); //mocked
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.contains(AcmgCriterion.PS1), is(expectedPs1));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
+    }
     @Test
     void testAssignPS1_SamePositionSameNucleotideSameProteinChangeDifferentCdna() {
         TestVariantDataService variantDataService = TestVariantDataService.builder()
@@ -310,7 +441,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(true));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(1));
     }
 
     @Test
@@ -343,7 +473,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(true));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(2));
     }
     @Test
     void testAssignPS1andPM5_TwoHitsassignPM1andOneHitPM5Chr10Pos123247514() {
@@ -377,7 +506,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(true));
         assertThat(builder.contains(AcmgCriterion.PM5), is(true));
-        assertThat(assigner.getProcessedVariantCount(), is(3));
     }
 
     @Test
@@ -412,7 +540,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -444,7 +571,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -476,7 +602,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -508,7 +633,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -541,7 +665,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(true));
-        assertThat(assigner.getProcessedVariantCount(), is(1));
     }
 
     @Test
@@ -549,7 +672,7 @@ class Acmg2015EvidenceAssignerTest {
         VariantDataService variantDataService = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19)
-                // all match ( remember when going over this if we only need the codon so we actually need a real codon check for stuff like that ? ) or does it not matter cause swapping posis after changes?
+                // all match
                 .put(variant12Chr10Pos123276892, clinVarPathogenicStarRating2)
                 .put(variant13Chr10Pos123276892, clinVarPathogenicStarRating2)
                 .put(variant14Chr10Pos123276893, clinVarPathogenicStarRating2)
@@ -576,7 +699,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(true));
-        assertThat(assigner.getProcessedVariantCount(), is(4));
     }
 
     @Test
@@ -608,7 +730,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -640,7 +761,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
@@ -672,13 +792,12 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.build(), equalTo(AcmgEvidence.empty()));
         assertThat(builder.contains(AcmgCriterion.PS1), is(false));
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
-        assertThat(assigner.getProcessedVariantCount(), is(0));
     }
 
     @Test
     void testAssignsPVS1() {
 
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         // requires variant to be on a transcript predicted to undergo NMD in a LoF-intolerant gene for full PVS1
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
@@ -721,7 +840,7 @@ class Acmg2015EvidenceAssignerTest {
             "UNKNOWN, X_DOMINANT, X_DOMINANT, true",
     })
     void testAssignsPVS1(Individual.Sex probandSex, InheritanceMode diseaseInheritanceMode, ModeOfInheritance modeOfInheritance, boolean expectPvs1) {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", probandSex));
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", probandSex), jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
                 .variantEffect(VariantEffect.START_LOST)
@@ -748,7 +867,7 @@ class Acmg2015EvidenceAssignerTest {
         Individual mother = Individual.builder().id("mother").sex(FEMALE).status(Individual.Status.UNAFFECTED).build();
         Individual father = Individual.builder().id("father").sex(MALE).status(Individual.Status.UNAFFECTED).build();
         Pedigree pedigree = Pedigree.of(proband, mother, father);
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", pedigree);
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", pedigree, jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                 // n.b. PTEN is a haploinsufficient gene
@@ -777,7 +896,7 @@ class Acmg2015EvidenceAssignerTest {
         Individual mother = Individual.builder().id("mother").sex(FEMALE).status(Individual.Status.UNAFFECTED).build();
         Individual father = Individual.builder().id("father").sex(MALE).status(Individual.Status.UNAFFECTED).build();
         Pedigree pedigree = Pedigree.of(proband, mother, father);
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", pedigree);
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", pedigree, jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                 // n.b. PTEN is a haploinsufficient gene
@@ -802,7 +921,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsPM2() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty());
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty(), jannovarAnnotator, initializeVariantDataservice());
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 12345, "A", "G")
                 // n.b. missing frequency data - will trigger PM2
                 .frequencyData(FrequencyData.of())
@@ -817,7 +936,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testVariantMustBeInGeneWithKnownDiseaseAssociationForAcmgCriteriaToBeAssigned() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty());
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty(), jannovarAnnotator, initializeVariantDataservice());
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(1, 12345, "A", "G")
                 // n.b. missing frequency data - should trigger PM2
                 .frequencyData(FrequencyData.of())
@@ -830,7 +949,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsPM3() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", null);
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", null, jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89000000, "A", "G")
                 // n.b. PTEN is a haploinsufficient gene
@@ -865,7 +984,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsBP2_InCisWithPathAR() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty());
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty(), jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89000000, "A", "G")
                 // n.b. has frequency data - will not trigger PM2
@@ -892,7 +1011,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsBP2_InTransWithPathAD() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty());
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty(), jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89000000, "A", "G")
                 // n.b. PTEN is a haploinsufficient gene
@@ -927,7 +1046,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsPM4() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                 .geneSymbol("MUC6")
                 .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -940,7 +1059,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsPM4_NotAssignedPM4WhenPVS1Present() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
 
         TranscriptAnnotation startLostAnnotation = TranscriptAnnotation.builder()
                 .geneSymbol("PTEN")
@@ -968,7 +1087,7 @@ class Acmg2015EvidenceAssignerTest {
 
         @Test
         void testAssignsPP3() {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -989,7 +1108,7 @@ class Acmg2015EvidenceAssignerTest {
                 "REVEL, 1.0f, PP3, STRONG"
         })
         void testAssignsPP3_singleScoreIsInsufficientUnlessItsRevel(PathogenicitySource pathogenicitySource, float pathogenicityScore, AcmgCriterion acmgCriterion, Evidence evidence) {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1005,7 +1124,7 @@ class Acmg2015EvidenceAssignerTest {
 
         @Test
         void testAssignsPP3_majorityMustBePath() {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1023,7 +1142,7 @@ class Acmg2015EvidenceAssignerTest {
 
         @Test
         void testPP3andPM4_majorityMustBePathOrBenign() {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1042,7 +1161,7 @@ class Acmg2015EvidenceAssignerTest {
 
         @Test
         void testAssignsBP4() {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1063,7 +1182,7 @@ class Acmg2015EvidenceAssignerTest {
             "REVEL, 0.0f, BP4, VERY_STRONG"
         })
         void testAssignsBP4_singleScoreIsInsufficientIfNotRevel(PathogenicitySource pathogenicitySource, float pathogenicityScore, AcmgCriterion acmgCriterion, Evidence evidence) {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1078,7 +1197,7 @@ class Acmg2015EvidenceAssignerTest {
         }
 
         void testAssignsBP4_majorityMustBeBenign() {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1106,7 +1225,7 @@ class Acmg2015EvidenceAssignerTest {
                 "0.003f, BP4, VERY_STRONG",
         })
         public void testRevelOverridesAllOtherScores(float revelScore, AcmgCriterion acmgCriterion, Evidence evidence) {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                     .geneSymbol("PTEN")
                     .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1129,7 +1248,7 @@ class Acmg2015EvidenceAssignerTest {
     // PP4
     @Test
     void testAssignsPP4() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                 .geneSymbol("PTEN")
                 .frequencyData(FrequencyData.of(Frequency.of(FrequencySource.EXAC_AMERICAN, 0.1f))) // prevent PM2 assignment
@@ -1156,7 +1275,7 @@ class Acmg2015EvidenceAssignerTest {
                         "practice guideline; STRONG",
                 })
         void testAssignsPP5(String reviewStatus, AcmgCriterion.Evidence evidence) {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty());
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty(), jannovarAnnotator, initializeVariantDataservice());
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89000000, "A", "G")
                     // n.b. PTEN is a haploinsufficient gene
                     .geneSymbol("PTEN")
@@ -1185,7 +1304,7 @@ class Acmg2015EvidenceAssignerTest {
                         "practice guideline; STRONG",
                 })
         void testAssignsBP6(String reviewStatus, AcmgCriterion.Evidence evidence) {
-            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty());
+            Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", Pedigree.empty(), jannovarAnnotator, initializeVariantDataservice());
             // https://www.ncbi.nlm.nih.gov/clinvar/variation/127667/
             VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89622915, "A", "G")
                     // n.b. PTEN is a haploinsufficient gene
@@ -1208,7 +1327,7 @@ class Acmg2015EvidenceAssignerTest {
 
     @Test
     void testAssignsBA1() {
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE));
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, initializeVariantDataservice());
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                 .geneSymbol("PTEN")
                 // high allele freq - triggers BA1 assignment
@@ -1227,7 +1346,7 @@ class Acmg2015EvidenceAssignerTest {
         Individual mother = Individual.builder().id("mother").sex(FEMALE).status(Individual.Status.AFFECTED).build();
         Individual father = Individual.builder().id("father").sex(MALE).status(Individual.Status.UNAFFECTED).build();
         Pedigree pedigree = Pedigree.of(proband, mother, father);
-        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", pedigree);
+        Acmg2015EvidenceAssigner instance = new Acmg2015EvidenceAssigner("proband", pedigree, jannovarAnnotator, initializeVariantDataservice());
         // https://www.ncbi.nlm.nih.gov/clinvar/variation/484600/ 3* PATHOGENIC variant  - reviewed by expert panel
         VariantEvaluation variantEvaluation = TestFactory.variantBuilder(10, 89624227, "A", "G")
                 // n.b. PTEN is a haploinsufficient gene

@@ -25,8 +25,13 @@
  */
 package org.monarchinitiative.exomiser.core.analysis.util;
 
+import com.google.errorprone.annotations.Var;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
 import org.monarchinitiative.exomiser.core.analysis.util.acmg.*;
+import org.monarchinitiative.exomiser.core.genome.GenomeAnalysisService;
+import org.monarchinitiative.exomiser.core.genome.JannovarVariantAnnotator;
+import org.monarchinitiative.exomiser.core.genome.VariantAnnotator;
+import org.monarchinitiative.exomiser.core.genome.VariantDataService;
 import org.monarchinitiative.exomiser.core.model.Gene;
 import org.monarchinitiative.exomiser.core.model.GeneScore;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual.Sex;
@@ -57,19 +62,24 @@ public class RawScoreGeneScorer implements GeneScorer {
 
     private final AcmgAssignmentCalculator acmgAssignmentCalculator;
 
+    private final VariantDataService variantDataService;
+    private final VariantAnnotator variantAnnotator;
+
     /**
      * @param probandId                Sample id of the proband in the VCF.
      * @param inheritanceModeAnnotator An {@code InheritanceModeAnnotator} for the pedigree related to the proband.
      * @throws NullPointerException if any input arguments are null.
      * @since 10.0.0
      */
-    public RawScoreGeneScorer(String probandId, Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator) {
+    public RawScoreGeneScorer(String probandId, Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, VariantAnnotator variantAnnotator, VariantDataService variantDataService) {
         Objects.requireNonNull(probandId);
         Objects.requireNonNull(inheritanceModeAnnotator);
+        this.variantDataService = Objects.requireNonNull(variantDataService);
+        this.variantAnnotator = Objects.requireNonNull(variantAnnotator);
         this.inheritanceModes = inheritanceModeAnnotator.getDefinedModes();
         this.contributingAlleleCalculator = new ContributingAlleleCalculator(probandId, probandSex, inheritanceModeAnnotator);
         this.genePriorityScoreCalculator = new GenePriorityScoreCalculator();
-        AcmgEvidenceAssigner acmgEvidenceAssigner = new Acmg2015EvidenceAssigner(probandId, inheritanceModeAnnotator.getPedigree());
+        AcmgEvidenceAssigner acmgEvidenceAssigner = new Acmg2015EvidenceAssigner(probandId, inheritanceModeAnnotator.getPedigree(), variantAnnotator, variantDataService);
         AcmgEvidenceClassifier acmgEvidenceClassifier = new Acgs2020Classifier();
         this.acmgAssignmentCalculator = new AcmgAssignmentCalculator(acmgEvidenceAssigner, acmgEvidenceClassifier);
     }
