@@ -31,10 +31,14 @@ import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypeType;
 import htsjdk.variant.variantcontext.VariantContext;
+import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.exomiser.core.filters.FilterResult;
 import org.monarchinitiative.exomiser.core.filters.FilterType;
+import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
+import org.monarchinitiative.exomiser.core.genome.JannovarVariantAnnotator;
 import org.monarchinitiative.exomiser.core.genome.TestFactory;
+import org.monarchinitiative.exomiser.core.genome.TestVariantDataService;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual.Sex;
@@ -60,6 +64,19 @@ public class RawScoreGeneScorerTest {
     private static final FilterResult FAIL_FREQUENCY = FilterResult.fail(FilterType.FREQUENCY_FILTER);
     private static final FilterResult PASS_PATHOGENICITY = FilterResult.pass(FilterType.PATHOGENICITY_FILTER);
     private static final FilterResult FAIL_PATHOGENICITY = FilterResult.fail(FilterType.PATHOGENICITY_FILTER);
+
+    private TestVariantDataService initializeVariantDataservice() {
+        TestVariantDataService.Builder builder = TestVariantDataService.builder()
+                .setMVStore(mvStore)
+                .setGenomeAssembly(GenomeAssembly.HG19);
+        return builder.build();
+    }
+
+    private final MVStore mvStore = new MVStore.Builder().compress().open();
+
+    private final JannovarVariantAnnotator jannovarAnnotator = new JannovarVariantAnnotator(TestFactory.getDefaultGenomeAssembly(), TestFactory
+            .buildDefaultJannovarData(), ChromosomalRegionIndex.empty());
+
 
     private Gene newGene(VariantEvaluation... variantEvaluations) {
         Gene gene = new Gene("TEST1", 1234);
@@ -119,7 +136,7 @@ public class RawScoreGeneScorerTest {
     private List<GeneScore> scoreGene(Gene gene, ModeOfInheritance modeOfInheritance, String probandSample, Pedigree pedigree, Sex sex) {
         InheritanceModeAnnotator inheritanceModeAnnotator = new InheritanceModeAnnotator(pedigree, InheritanceModeOptions
                 .defaultForModes(modeOfInheritance));
-        RawScoreGeneScorer instance = new RawScoreGeneScorer(probandSample, sex, inheritanceModeAnnotator);
+        RawScoreGeneScorer instance = new RawScoreGeneScorer(probandSample, sex, inheritanceModeAnnotator, jannovarAnnotator, initializeVariantDataservice());
         return instance.scoreGene().apply(gene);
     }
 
@@ -137,12 +154,12 @@ public class RawScoreGeneScorerTest {
 
     private RawScoreGeneScorer getInstance(InheritanceModeOptions inheritanceModeOptions, String probandSample, Pedigree pedigree) {
         InheritanceModeAnnotator inheritanceModeAnnotator = new InheritanceModeAnnotator(pedigree, inheritanceModeOptions);
-        return new RawScoreGeneScorer(probandSample, Sex.UNKNOWN, inheritanceModeAnnotator);
+        return new RawScoreGeneScorer(probandSample, Sex.UNKNOWN, inheritanceModeAnnotator, jannovarAnnotator, initializeVariantDataservice());
     }
 
     private RawScoreGeneScorer getInstance(InheritanceModeOptions inheritanceModeOptions, Sex sex, String probandSample, Pedigree pedigree) {
         InheritanceModeAnnotator inheritanceModeAnnotator = new InheritanceModeAnnotator(pedigree, inheritanceModeOptions);
-        return new RawScoreGeneScorer(probandSample, sex, inheritanceModeAnnotator);
+        return new RawScoreGeneScorer(probandSample, sex, inheritanceModeAnnotator, jannovarAnnotator, initializeVariantDataservice());
     }
 
     @Test
@@ -714,7 +731,7 @@ public class RawScoreGeneScorerTest {
 
         InheritanceModeAnnotator inheritanceModeAnnotator = new InheritanceModeAnnotator(Pedigree.justProband("Nemo"), InheritanceModeOptions
                 .empty());
-        RawScoreGeneScorer instance = new RawScoreGeneScorer("Nemo", Sex.UNKNOWN, inheritanceModeAnnotator);
+        RawScoreGeneScorer instance = new RawScoreGeneScorer("Nemo", Sex.UNKNOWN, inheritanceModeAnnotator, jannovarAnnotator, initializeVariantDataservice());
         instance.scoreGenes(genes);
 
         assertThat(genes.indexOf(first), equalTo(0));
