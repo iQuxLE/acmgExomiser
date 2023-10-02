@@ -70,10 +70,8 @@ class Acmg2015EvidenceAssignerTest {
             .setReviewStatus("criteria provided, multiple submitters, no conflicts")
             .build();
 
-
     private final MVStore mvStore = new MVStore.Builder().compress().open();
 
-    // use that for custom cvInterpret
     private TestVariantDataService initializeCustomVariantDataservice(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
                 .setMVStore(mvStore)
@@ -84,15 +82,12 @@ class Acmg2015EvidenceAssignerTest {
         return builder.build();
     }
 
-    // for use out of PS1 and PM5 to delete the 2nd constructor
-    // all from PVS1 on
     private TestVariantDataService initializeVariantDataservice(){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
         return builder.build();
     }
-
 
     private VariantEvaluation buildVariantEvaluation(int chr, int pos, String ref, String alt, String hgvs, String cdna, String geneSymbol, VariantEffect variantEffect) {
         TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
@@ -108,7 +103,6 @@ class Acmg2015EvidenceAssignerTest {
                 .build();
     }
 
-
     private AlleleProto.AlleleKey parseAlleleKey(String variant){
         String[] vars = variant.split("-");
         return AlleleProto.AlleleKey.newBuilder()
@@ -118,7 +112,6 @@ class Acmg2015EvidenceAssignerTest {
                 .setAlt(vars[3])
                 .build();
     }
-
 
     @Test
     void throwsExceptionWithMismatchedIds() {
@@ -206,8 +199,6 @@ class Acmg2015EvidenceAssignerTest {
 
     })
 
-        // ny now only PS1 add pathogenic from PM5
-
     void testAssignPS1orPM5NotPathogenic(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
         TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarBenignStarRating2, variant);
@@ -222,14 +213,11 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
     }
 
-
     @ParameterizedTest
     @CsvSource({
             // VariantEvaluation would fit but clinVarMap holds mocked Variant with starRating1 only in this Range
             "10-123247515-T-C, false, false" // mocked Variant (here made with no fitting starRating)
     })
-
-    // ny now only PS1 add starRating from PM5
 
     void testAssignPS1orPM5NoStarRating1(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
@@ -251,7 +239,6 @@ class Acmg2015EvidenceAssignerTest {
             "10-123276856-G-C, false, false" // https://www.ncbi.nlm.nih.gov/clinvar/variation/13265/ no hit (same AAchange
     })
 
-
     void testAssignPS1orPM5againstChr10Pos123276856GC(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
         TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
@@ -272,7 +259,7 @@ class Acmg2015EvidenceAssignerTest {
             "10-123276892-C-G, false, true", // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/
             "10-123276891-G-C, false, true", // https://www.ncbi.nlm.nih.gov/clinvar/variation/13275/
             "10-123276893-A-T, false, true", // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
-            "10-123276892-C-T, false, false" // dont find same position proteinChange
+            "10-123276892-C-T, false, false" // dont match - same position proteinChange (same variant)
     })
 
 
@@ -290,7 +277,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.contains(AcmgCriterion.PM5), is(expectedPm5));
     }
 
-    // did not add No Missense again, No Pathogenic again, Not starRating again cause already in PS1 (can be done by checking commits)
     @Test
     void testAssignsPVS1() {
 
