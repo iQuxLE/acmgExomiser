@@ -165,6 +165,15 @@ public class TestVariantDataService implements VariantDataService {
             return this;
         }
 
+        public Builder setEmptyMvStore(MVStore store) {
+            this.mvStore = store;
+            if(mvStore == null) {
+                throw new IllegalArgumentException("MVStore is not initialized!");
+            }
+            this.clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
+            return this;
+        }
+
         public Builder setGenomeAssembly(GenomeAssembly genomeAssembly){
             this.genomeAssembly = genomeAssembly;
             return this;

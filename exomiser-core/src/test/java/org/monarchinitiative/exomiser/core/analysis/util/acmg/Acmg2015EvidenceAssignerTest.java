@@ -22,6 +22,7 @@ package org.monarchinitiative.exomiser.core.analysis.util.acmg;
 
 import de.charite.compbio.jannovar.annotation.VariantEffect;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
+import htsjdk.variant.variantcontext.Allele;
 import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -198,6 +199,75 @@ class Acmg2015EvidenceAssignerTest {
 
 
     private final MVStore mvStore = new MVStore.Builder().compress().open();
+
+    // use that for custom cvInterpret
+    private TestVariantDataService initializeVariantDataserviceWithCustom(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
+        TestVariantDataService.Builder builder = TestVariantDataService.builder()
+                .setEmptyMvStore(mvStore)
+                .setGenomeAssembly(GenomeAssembly.HG19);
+        for (AlleleProto.AlleleKey alleleKey : alleleKeys){
+            builder.put(alleleKey,cvInterpretation);
+        }
+        return builder.build();
+    }
+
+    // for use out of PS1 and PM5 to delete the 2nd constructor
+    // all from PVS1 on
+    private TestVariantDataService initializeVariantDataserviceWithEmptyMvStore(){
+        TestVariantDataService.Builder builder = TestVariantDataService.builder()
+                .setEmptyMvStore(mvStore)
+                .setGenomeAssembly(GenomeAssembly.HG19);
+        return builder.build();
+    }
+
+
+    private VariantEvaluation buildVariantEvaluation(int chr, int pos, String ref, String alt, String hgvs, String cdna, String geneSymbol) {
+        TranscriptAnnotation transcriptAnnotation = TranscriptAnnotation.builder()
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .hgvsProtein(hgvs)
+                .hgvsCdna(cdna)
+                .build();
+
+        return TestFactory.variantBuilder(chr, pos, ref, alt)
+                .geneSymbol(geneSymbol)
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .annotations(List.of(transcriptAnnotation))
+                .build();
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "10-123276892-C-G, true, false",
+            "10-123276893-A-T, true, false",
+            "10-123247514-C-G, false, false"
+
+    })
+    void testAssignPS1_SamePositionSameNucleotideSameProteinChangeDifferentCdna(String variantStr, boolean expectPs1, boolean expectPm5) {
+        AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
+        TestVariantDataService variantDataService = initializeVariantDataserviceWithCustom(clinVarPathogenicStarRating2, variant);
+        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+
+        VariantEvaluation variantEvaluation = buildVariantEvaluation(variant.getChr(), variant.getPosition(), variant.getRef(), variant.getAlt(), "p.(Cys342Ser)", "c.1024T>A", "FGFR2");
+
+        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+        assigner.assignPS1orPM5(builder, variantEvaluation);
+        assertThat(builder.build(), not(equalTo(AcmgEvidence.empty())));
+        assertThat(builder.contains(AcmgCriterion.PS1), is(expectPs1));
+        assertThat(builder.contains(AcmgCriterion.PM5), is(expectPm5));
+        assertThat(assigner.getProcessedVariantCount(), is(1));
+    }
+
+
+    private AlleleProto.AlleleKey parseAlleleKey(String variant){
+        String[] vars = variant.split("-");
+        return AlleleProto.AlleleKey.newBuilder()
+                .setChr(Integer.parseInt(vars[0]))
+                .setPosition(Integer.parseInt(vars[1]))
+                .setRef(vars[2])
+                .setAlt(vars[3])
+                .build();
+    }
 
 
     @Test
@@ -604,8 +674,6 @@ class Acmg2015EvidenceAssignerTest {
         assertThat(builder.contains(AcmgCriterion.PM5), is(false));
         assertThat(assigner.getProcessedVariantCount(), is(0));
     }
-
-
 
     @Test
     void testAssignsPVS1() {
