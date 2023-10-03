@@ -2,6 +2,8 @@ package org.monarchinitiative.exomiser.core.analysis.util;
 
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
 import org.monarchinitiative.exomiser.core.analysis.util.acmg.*;
+import org.monarchinitiative.exomiser.core.genome.VariantAnnotator;
+import org.monarchinitiative.exomiser.core.genome.VariantDataService;
 import org.monarchinitiative.exomiser.core.model.Gene;
 import org.monarchinitiative.exomiser.core.model.GeneScore;
 import org.monarchinitiative.exomiser.core.model.Pedigree;
@@ -29,6 +31,8 @@ public class PvalueGeneScorer implements GeneScorer {
     private final GenePriorityScoreCalculator genePriorityScoreCalculator;
     private final CombinedScorePvalueCalculator pValueCalculator;
     private final AcmgAssignmentCalculator acmgAssignmentCalculator;
+    VariantDataService variantDataService;
+    VariantAnnotator variantAnnotator;
 
     /**
      * @param acmgAssignmentCalculator
@@ -37,9 +41,11 @@ public class PvalueGeneScorer implements GeneScorer {
      * @throws NullPointerException if any input arguments are null.
      * @since 10.0.0
      */
-    public PvalueGeneScorer(String probandId, Pedigree.Individual.Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, CombinedScorePvalueCalculator pValueCalculator, AcmgAssignmentCalculator acmgAssignmentCalculator) {
+    public PvalueGeneScorer(String probandId, Pedigree.Individual.Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, CombinedScorePvalueCalculator pValueCalculator, AcmgAssignmentCalculator acmgAssignmentCalculator, VariantDataService variantDataService, VariantAnnotator variantAnnotator) {
         Objects.requireNonNull(probandId);
         Objects.requireNonNull(inheritanceModeAnnotator);
+        this.variantDataService = Objects.requireNonNull(variantDataService);
+        this.variantAnnotator = Objects.requireNonNull(variantAnnotator);
         this.inheritanceModes = inheritanceModeAnnotator.getDefinedModes();
         this.contributingAlleleCalculator = new ContributingAlleleCalculator(probandId, probandSex, inheritanceModeAnnotator);
         this.genePriorityScoreCalculator = new GenePriorityScoreCalculator();
