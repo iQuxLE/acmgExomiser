@@ -59,15 +59,10 @@ public class PathogenicityDataProviderTest {
             .of(0f), MutationTasterScore.of(1f));
     private static final PathogenicityData EMPTY_PATH_DATA = PathogenicityData.empty();
 
-    private final MVStore mvStore = new MVStore.Builder().compress().open();
-
-
     @BeforeEach
     public void setUp() {
         variant = TestFactory.variantBuilder(1, 1, "A", "T").pathogenicityData(EMPTY_PATH_DATA).build();
         variantDataService = TestVariantDataService.builder()
-                .setMVStore(mvStore)
-                .setGenomeAssembly(GenomeAssembly.HG19)
                 .put(variant, EXPECTED_PATH_DATA)
                 .build();
     }

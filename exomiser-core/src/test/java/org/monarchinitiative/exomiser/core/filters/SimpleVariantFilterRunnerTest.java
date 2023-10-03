@@ -73,9 +73,6 @@ public class SimpleVariantFilterRunnerTest {
     private VariantEvaluation passesTargetQualityFilter;
 
     private List<VariantEvaluation> variantEvaluations;
-
-    private final MVStore mvStore = new MVStore.Builder().compress().open();
-
     @BeforeEach
     public void setUp() {
 
@@ -102,8 +99,6 @@ public class SimpleVariantFilterRunnerTest {
                 passesTargetQualityFilter);
 
         VariantDataService variantDataService = TestVariantDataService.builder()
-                .setMVStore(mvStore)
-                .setGenomeAssembly(GenomeAssembly.HG19)
                 .expectedFrequencyData(mockFrequencyData())
                 .build();
 

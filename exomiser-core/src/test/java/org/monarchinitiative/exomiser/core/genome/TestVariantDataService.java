@@ -153,8 +153,8 @@ public class TestVariantDataService implements VariantDataService {
         private Map<Variant, PathogenicityData> expectedPathogenicityData = new HashMap<>();
 
         private GenomeAssembly genomeAssembly;
-        private MVStore mvStore;
-        private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
+        private MVStore mvStore = new MVStore.Builder().open();;
+        private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
 
         public Builder setMVStore(MVStore store) {
             this.mvStore = store;
