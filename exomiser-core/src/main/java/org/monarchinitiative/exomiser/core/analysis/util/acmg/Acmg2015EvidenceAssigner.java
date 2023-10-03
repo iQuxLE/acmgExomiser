@@ -269,8 +269,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
-        // this catches early mistake but also hacks and makes sure that in tests when for example PS2 is called and the transcriptAnnotation is not given this breaks early and does not call the function
-        // but still mvStore is not really empty ...
         if (annotations == null || annotations.isEmpty()){
             logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
             return;
@@ -307,21 +305,21 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
                         if (variantAnnotation.hasTranscriptAnnotations()) {
                             VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
-                            // check for if not Missense
+                            if (variantEffectFromVariantStore != VariantEffect.MISSENSE_VARIANT){
+                                return;
+                            }
                             logger.debug("Proto: " + variantEffectFromVariantStore);
                             TranscriptAnnotation transcriptAnnotationFromAnnotatedClinVarData = variantAnnotation.getTranscriptAnnotations().get(0);
                             String proteinChangeFromProto = transcriptAnnotationFromAnnotatedClinVarData.getHgvsProtein();
-                            TranscriptAnnotation transcriptAnnotationFromEntriesInRange = transcriptAnnotationFromAnnotatedClinVarData;
-                            String cdnaChangeFromProto = transcriptAnnotationFromEntriesInRange.getHgvsCdna();
+                            String cdnaChangeFromProto = transcriptAnnotationFromAnnotatedClinVarData.getHgvsCdna();
 
                             logger.debug("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
                             logger.debug("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
 
-                            if (proteinChangeFromInput.equals(proteinChangeFromProto) && !cdnaChangeFromInput.equals(cdnaChangeFromProto) && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                            if (proteinChangeFromInput.equals(proteinChangeFromProto) && !cdnaChangeFromInput.equals(cdnaChangeFromProto)) {
                                 acmgEvidenceBuilder.add(PS1);
                             }
-                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)
-                                    && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)) {
                                 acmgEvidenceBuilder.add(PM5);
                             }
                         }
