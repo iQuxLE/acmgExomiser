@@ -20,44 +20,24 @@
 
 package org.monarchinitiative.exomiser.core.analysis.util.acmg;
 
-import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.Var;
 import de.charite.compbio.jannovar.annotation.VariantEffect;
-import de.charite.compbio.jannovar.annotation.builders.StructuralVariantAnnotationBuilder;
-import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
-import de.charite.compbio.jannovar.reference.HG19RefDictBuilder;
-import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.h2.mvstore.MVMap;
-import org.h2.mvstore.MVStore;
-import org.h2.util.json.JSONTarget;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraint;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraints;
 import org.monarchinitiative.exomiser.core.analysis.util.InheritanceModeAnalyser;
 import org.monarchinitiative.exomiser.core.genome.*;
-import org.monarchinitiative.exomiser.core.genome.dao.AllelePropertiesDao;
-import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.ClinVarDataType;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.VariantStoreDao;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.*;
 import org.monarchinitiative.exomiser.core.phenotype.ModelPhenotypeMatch;
 import org.monarchinitiative.exomiser.core.prioritisers.model.Disease;
-import org.monarchinitiative.exomiser.core.proto.AlleleProto;
-import org.monarchinitiative.exomiser.core.proto.ProtoConverter;
 import org.monarchinitiative.svart.*;
-import org.monarchinitiative.svart.util.VariantTrimmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.*;
@@ -269,8 +249,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
-        // this catches early mistake but also hacks and makes sure that in tests when for example PS2 is called and the transcriptAnnotation is not given this breaks early and does not call the function
-        // but still mvStore is not really empty ...
         if (annotations == null || annotations.isEmpty()){
             logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
             return;
@@ -307,21 +285,21 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
                         if (variantAnnotation.hasTranscriptAnnotations()) {
                             VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
-                            // check for if not Missense
+                            if (variantEffectFromVariantStore != VariantEffect.MISSENSE_VARIANT){
+                                return;
+                            }
                             logger.debug("Proto: " + variantEffectFromVariantStore);
                             TranscriptAnnotation transcriptAnnotationFromAnnotatedClinVarData = variantAnnotation.getTranscriptAnnotations().get(0);
                             String proteinChangeFromProto = transcriptAnnotationFromAnnotatedClinVarData.getHgvsProtein();
-                            TranscriptAnnotation transcriptAnnotationFromEntriesInRange = transcriptAnnotationFromAnnotatedClinVarData;
-                            String cdnaChangeFromProto = transcriptAnnotationFromEntriesInRange.getHgvsCdna();
+                            String cdnaChangeFromProto = transcriptAnnotationFromAnnotatedClinVarData.getHgvsCdna();
 
                             logger.debug("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
                             logger.debug("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
 
-                            if (proteinChangeFromInput.equals(proteinChangeFromProto) && !cdnaChangeFromInput.equals(cdnaChangeFromProto) && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                            if (proteinChangeFromInput.equals(proteinChangeFromProto) && !cdnaChangeFromInput.equals(cdnaChangeFromProto)) {
                                 acmgEvidenceBuilder.add(PS1);
                             }
-                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)
-                                    && variantEffectFromVariantStore == VariantEffect.MISSENSE_VARIANT) {
+                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)) {
                                 acmgEvidenceBuilder.add(PM5);
                             }
                         }

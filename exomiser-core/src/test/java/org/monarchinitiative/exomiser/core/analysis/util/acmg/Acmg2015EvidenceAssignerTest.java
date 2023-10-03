@@ -22,7 +22,6 @@ package org.monarchinitiative.exomiser.core.analysis.util.acmg;
 
 import de.charite.compbio.jannovar.annotation.VariantEffect;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
-import htsjdk.variant.variantcontext.Allele;
 import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
