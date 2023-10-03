@@ -20,8 +20,10 @@
 
 package org.monarchinitiative.exomiser.core.filters;
 
+import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
 import org.monarchinitiative.exomiser.core.genome.TestFactory;
 import org.monarchinitiative.exomiser.core.genome.TestVariantDataService;
 import org.monarchinitiative.exomiser.core.genome.VariantDataService;
@@ -53,6 +55,9 @@ public class FrequencyDataProviderTest {
     private VariantEvaluation variant;
     private final FrequencyData defaultFrequencyData = FrequencyData.empty();
 
+    private final MVStore mvStore = new MVStore.Builder().compress().open();
+
+
     @BeforeEach
     public void setUp() {
         variant = TestFactory.variantBuilder(1, 1, "A", "T").frequencyData(defaultFrequencyData).build();
@@ -81,7 +86,7 @@ public class FrequencyDataProviderTest {
     @Test
     public void testProvidesFrequencyDataForVariantWhenRun() {
         FrequencyData expectedData = FrequencyData.of(RS_ID, Frequency.of(ESP_ALL, 1.0f));
-        VariantDataService variantDataService = TestVariantDataService.builder().put(variant, expectedData).build();
+        VariantDataService variantDataService = TestVariantDataService.builder().setMVStore(mvStore).setGenomeAssembly(GenomeAssembly.HG19).put(variant, expectedData).build();
        
         instance = new FrequencyDataProvider(variantDataService, EnumSet.allOf(FrequencySource.class), new KnownVariantFilter());
         assertThat(variant.getFrequencyData(), equalTo(defaultFrequencyData));
@@ -118,7 +123,7 @@ public class FrequencyDataProviderTest {
         FrequencyData variantFrequencyData = FrequencyData.of(RS_ID, espAll, Frequency.of(EXAC_AFRICAN_INC_AFRICAN_AMERICAN, 0.234f), Frequency
                 .of(EXAC_FINNISH, 0.02f));
 
-        VariantDataService variantDataService = TestVariantDataService.builder().put(variant, variantFrequencyData).build();
+        VariantDataService variantDataService = TestVariantDataService.builder().setMVStore(mvStore).setGenomeAssembly(GenomeAssembly.HG19).put(variant, variantFrequencyData).build();
 
         instance = new FrequencyDataProvider(variantDataService, EnumSet.of(espAll.getSource()), new KnownVariantFilter());
         instance.runFilter(variant);
@@ -133,7 +138,7 @@ public class FrequencyDataProviderTest {
         Frequency exacAfr = Frequency.of(EXAC_AFRICAN_INC_AFRICAN_AMERICAN, 0.234f);
         FrequencyData variantFrequencyData = FrequencyData.of(RS_ID, espAll, exacAfr, Frequency.of(EXAC_FINNISH, 0.02f));
 
-        VariantDataService variantDataService = TestVariantDataService.builder().put(variant, variantFrequencyData).build();
+        VariantDataService variantDataService = TestVariantDataService.builder().setMVStore(mvStore).setGenomeAssembly(GenomeAssembly.HG19).put(variant, variantFrequencyData).build();
 
         instance = new FrequencyDataProvider(variantDataService, EnumSet.of(espAll.getSource(), exacAfr.getSource()), new KnownVariantFilter());
         instance.runFilter(variant);
