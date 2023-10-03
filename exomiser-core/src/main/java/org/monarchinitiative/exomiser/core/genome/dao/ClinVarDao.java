@@ -1,10 +1,7 @@
 package org.monarchinitiative.exomiser.core.genome.dao;
 
-import org.h2.mvstore.MVStore;
-import org.monarchinitiative.exomiser.core.genome.dao.serialisers.VariantStoreDao;
 import org.monarchinitiative.exomiser.core.model.Variant;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.GenomicInterval;
 import org.monarchinitiative.svart.GenomicVariant;
 
