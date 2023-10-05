@@ -61,9 +61,8 @@ public class RawScoreGeneScorer implements GeneScorer {
     private final GenePriorityScoreCalculator genePriorityScoreCalculator;
 
     private final AcmgAssignmentCalculator acmgAssignmentCalculator;
-
-    private final VariantDataService variantDataService;
-    private final VariantAnnotator variantAnnotator;
+    VariantDataService variantDataService;
+    VariantAnnotator variantAnnotator;
 
     /**
      * @param probandId                Sample id of the proband in the VCF.

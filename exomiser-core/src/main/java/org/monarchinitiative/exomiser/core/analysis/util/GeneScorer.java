@@ -25,6 +25,8 @@
  */
 package org.monarchinitiative.exomiser.core.analysis.util;
 
+import org.monarchinitiative.exomiser.core.genome.VariantAnnotator;
+import org.monarchinitiative.exomiser.core.genome.VariantDataService;
 import org.monarchinitiative.exomiser.core.model.Gene;
 import org.monarchinitiative.exomiser.core.model.GeneScore;
 import org.monarchinitiative.exomiser.core.prioritisers.PriorityType;
@@ -40,7 +42,6 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 public interface GeneScorer {
-
     public Function<Gene, List<GeneScore>> scoreGene();
 
     default List<Gene> scoreGenes(List<Gene> genes) {

@@ -56,6 +56,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
     private final VariantDataService variantDataService;
     private final VariantAnnotator variantAnnotator;
 
+//    private final VariantType variantType;
+
     public Acmg2015EvidenceAssigner(String probandId, Pedigree pedigree, VariantAnnotator variantAnnotator, VariantDataService variantDataService) {
         this.probandId = Objects.requireNonNull(probandId);
         this.pedigree = pedigree == null || pedigree.isEmpty() ? Pedigree.justProband(probandId) : pedigree;
@@ -104,7 +106,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
         // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
         // PM5: "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
-        assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
+            assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
 
 
         if (pedigree.containsId(probandId)) {
@@ -190,9 +192,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         ) {
             if (variantEvaluation.hasTranscriptAnnotations()) {
                 TranscriptAnnotation transcriptAnnotation = variantEvaluation.getTranscriptAnnotations().get(0);
-                System.out.println(transcriptAnnotation);
-                System.out.println(transcriptAnnotation.getHgvsProtein());
-
                 if (predictedToLeadToNmd(transcriptAnnotation)) {
                     acmgEvidenceBuilder.add(PVS1);
                 } else {
@@ -248,6 +247,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
      * PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
+
         List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
         if (annotations == null || annotations.isEmpty()){
             logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
@@ -271,12 +271,13 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
                 if (isPathOrLikelyPath(clinicalSignificance) && starRating >= 2) {
 
-                    int pos = entry.getKey().start();
+                    int start = entry.getKey().start();
+                    int end = entry.getKey().end();
                     String ref = entry.getKey().ref();
                     String alt = entry.getKey().alt();
 
                     List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(VariantEvaluation.builder()
-                            .variant(variantEvaluation.contig(), Strand.POSITIVE, Coordinates.oneBased(pos, pos), ref, alt).build());
+                            .variant(variantEvaluation.contig(), Strand.POSITIVE, Coordinates.oneBased(start, end), ref, alt).build());
 
                     if (!annotatedVariantList.isEmpty()) {
 

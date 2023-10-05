@@ -20,8 +20,10 @@
 
 package org.monarchinitiative.exomiser.core.filters;
 
+import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
 import org.monarchinitiative.exomiser.core.genome.TestFactory;
 import org.monarchinitiative.exomiser.core.genome.TestVariantDataService;
 import org.monarchinitiative.exomiser.core.genome.VariantDataService;
@@ -52,6 +54,8 @@ public class FrequencyDataProviderTest {
 
     private VariantEvaluation variant;
     private final FrequencyData defaultFrequencyData = FrequencyData.empty();
+
+
 
     @BeforeEach
     public void setUp() {

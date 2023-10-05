@@ -79,10 +79,12 @@ public class ClinVarDaoMvStore implements ClinVarDao {
         logger.debug("Iterate through entries");
         Iterator<AlleleProto.AlleleKey> keyIterator = clinVarMap.keyIterator(lowerBound);
 
-        while (keyIterator.hasNext()) {
+        while (keyIterator.hasNext() ) {
             AlleleProto.AlleleKey ak = keyIterator.next();
             // don't process keys out of the initial boundaries
-            if (ak.getPosition() >= start && ak.getPosition() <= end) {
+            if (ak.getPosition() >= start && ak.getPosition() <= end
+                    && (ak.getRef().length() <= 1 && ak.getAlt().length() <= 1)) {
+
                 GenomicVariant gvFromAk = alleleKeyToGenomicVariant(ak, contig);
                 ClinVarData cvData = getClinVarDataFromGenomicVariant(gvFromAk);
                 results.put(gvFromAk, cvData);

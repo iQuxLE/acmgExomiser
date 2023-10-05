@@ -99,6 +99,22 @@ class ClinVarDaoMvStoreTest {
             .setRef("G")
             .build();
 
+    // two variants that are in range but Alt.length and Ref.length > 1
+
+    private final  AlleleProto.AlleleKey positionInButLengthIncorrect = AlleleProto.AlleleKey.newBuilder()
+            .setChr(1)
+            .setPosition(1229)
+            .setAlt("AA")
+            .setRef("G")
+            .build();
+
+    private final  AlleleProto.AlleleKey positionInButLengthIncorrect1 = AlleleProto.AlleleKey.newBuilder()
+            .setChr(1)
+            .setPosition(1231)
+            .setAlt("A")
+            .setRef("GG")
+            .build();
+
 
 
 
@@ -292,6 +308,27 @@ class ClinVarDaoMvStoreTest {
         VariantEvaluation variantEvaluation = VariantEvaluation.builder()
                 .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
                 .build();
+
+        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+
+        var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
+        assertThat(result.isEmpty(), is(true));
+        assertThat(result.size(), is(0));
+
+    }
+    @Test
+    public void setPositionInButLengthIncorrectTest(){
+        VariantEvaluation variantEvaluation = VariantEvaluation.builder()
+                .variant(genomeAssembly.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(1230, 1230),"T", "A" )
+                .build();
+
+        clinVarMap.put(positionInButLengthIncorrect, AlleleProto.ClinVar.newBuilder()
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                .build());
+
+        clinVarMap.put(positionInButLengthIncorrect1, AlleleProto.ClinVar.newBuilder()
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                .build());
 
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
