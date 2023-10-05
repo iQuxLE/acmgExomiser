@@ -71,7 +71,7 @@ class Acmg2015EvidenceAssignerTest {
 
     private final MVStore mvStore = new MVStore.Builder().compress().open();
 
-    private TestVariantDataService initializeCustomVariantDataservice(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
+    private VariantDataService initializeCustomVariantDataservice(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
@@ -81,7 +81,7 @@ class Acmg2015EvidenceAssignerTest {
         return builder.build();
     }
 
-    private TestVariantDataService initializeVariantDataservice(){
+    private VariantDataService initializeVariantDataservice(){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
                 .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
@@ -134,7 +134,7 @@ class Acmg2015EvidenceAssignerTest {
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
     void testAssignPS1orPM5againstChr10Pos123276893AT(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123276893, "A", "T",
@@ -156,7 +156,7 @@ class Acmg2015EvidenceAssignerTest {
 
     void testAssignPS1orPM5againstChr10Pos123247514CA(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
@@ -179,7 +179,7 @@ class Acmg2015EvidenceAssignerTest {
 
     void testAssignPS1orPM5VariantEvaluationIsNotMissense(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
@@ -200,7 +200,7 @@ class Acmg2015EvidenceAssignerTest {
 
     void testAssignPS1orPM5NotPathogenic(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarBenignStarRating2, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarBenignStarRating2, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
@@ -220,7 +220,7 @@ class Acmg2015EvidenceAssignerTest {
 
     void testAssignPS1orPM5NoStarRating1(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating1, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating1, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
@@ -240,7 +240,7 @@ class Acmg2015EvidenceAssignerTest {
 
     void testAssignPS1orPM5againstChr10Pos123276856GC(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123276856, "G", "C",
@@ -264,7 +264,7 @@ class Acmg2015EvidenceAssignerTest {
 
     void testAssignPS1orPM5againstChr10Pos123276892CT(String variantStr, boolean expectedPs1, boolean expectedPm5) {
         AlleleProto.AlleleKey variant = parseAlleleKey(variantStr);
-        TestVariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
         Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
 
         VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123276892, "C", "T",

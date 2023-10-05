@@ -33,6 +33,7 @@ public class PvalueGeneScorer implements GeneScorer {
     private final AcmgAssignmentCalculator acmgAssignmentCalculator;
     VariantDataService variantDataService;
     VariantAnnotator variantAnnotator;
+    // VariantDataService variantDataService, VariantAnnotator variantAnnotator
 
     /**
      * @param acmgAssignmentCalculator
@@ -41,7 +42,8 @@ public class PvalueGeneScorer implements GeneScorer {
      * @throws NullPointerException if any input arguments are null.
      * @since 10.0.0
      */
-    public PvalueGeneScorer(String probandId, Pedigree.Individual.Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, CombinedScorePvalueCalculator pValueCalculator, AcmgAssignmentCalculator acmgAssignmentCalculator, VariantDataService variantDataService, VariantAnnotator variantAnnotator) {
+    public PvalueGeneScorer(String probandId, Pedigree.Individual.Sex probandSex, InheritanceModeAnnotator inheritanceModeAnnotator, CombinedScorePvalueCalculator pValueCalculator, AcmgAssignmentCalculator acmgAssignmentCalculator,  VariantDataService variantDataService, VariantAnnotator variantAnnotator
+    ) {
         Objects.requireNonNull(probandId);
         Objects.requireNonNull(inheritanceModeAnnotator);
         this.variantDataService = Objects.requireNonNull(variantDataService);

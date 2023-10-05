@@ -42,8 +42,6 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 public interface GeneScorer {
-//    VariantAnnotator variantannotator;
-//    VariantDataService variantDataservice;
     public Function<Gene, List<GeneScore>> scoreGene();
 
     default List<Gene> scoreGenes(List<Gene> genes) {

@@ -31,6 +31,7 @@ import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.prioritisers.Prioritiser;
 import org.monarchinitiative.exomiser.core.prioritisers.PriorityType;
+import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
