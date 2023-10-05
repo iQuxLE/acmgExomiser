@@ -86,7 +86,6 @@ public class ClinVarDaoMvStore implements ClinVarDao {
                     && (ak.getRef().length() <= 1 && ak.getAlt().length() <= 1)) {
 
                 GenomicVariant gvFromAk = alleleKeyToGenomicVariant(ak, contig);
-                logger.info(gvFromAk + "");
                 ClinVarData cvData = getClinVarDataFromGenomicVariant(gvFromAk);
                 results.put(gvFromAk, cvData);
             }
