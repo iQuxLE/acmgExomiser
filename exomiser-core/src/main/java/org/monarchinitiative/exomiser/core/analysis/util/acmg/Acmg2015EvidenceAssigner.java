@@ -20,8 +20,10 @@
 
 package org.monarchinitiative.exomiser.core.analysis.util.acmg;
 
+import com.google.errorprone.annotations.Var;
 import de.charite.compbio.jannovar.annotation.VariantEffect;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
+import hpo.DiseaseGeneMapper;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraint;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraints;
 import org.monarchinitiative.exomiser.core.analysis.util.InheritanceModeAnalyser;
@@ -242,12 +244,17 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                 || variantEffect == VariantEffect.EXON_LOSS_VARIANT;
     }
 
+    public void assign_PP1(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation, DiseaseGeneMapper mapper){
+        String geneSymbol = variantEvaluation.getGeneSymbol();
+        // use that geneSymbol as String to parse a mvStore map that holds data for Gene and clinSig + molecularConsequence Counts
+
+    }
+
     /**
      * PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
      * PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
-
         List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
         if (annotations == null || annotations.isEmpty()){
             logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
@@ -282,7 +289,7 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                     if (!annotatedVariantList.isEmpty()) {
 
                         VariantAnnotation variantAnnotation = annotatedVariantList.get(0);
-                        logger.debug("Proto: " + variantAnnotation);
+                        logger.info("Proto-VariantAnnotation: " + variantAnnotation);
 
                         if (variantAnnotation.hasTranscriptAnnotations()) {
                             VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
@@ -309,6 +316,21 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
             }
         }
     }
+//
+//    private void annotatorToget
+//
+//    private void assignPP2(AcmgEvidence.Builder builder,  VariantEvaluation variantEvaluation){
+//        String geneSymbol = variantEvaluation.getGeneSymbol();
+//        // basically just needs LIST of VariantEvaluations for a specific GeneSymbol and retrieve ClinvArAData from thsi
+//        // query hmm but makes less sense cause the stats should be there with initalization simlar to the stuff we are doing with MvStoe
+//        var x = variantEvaluation.getVariantEffect();
+//        var y =variantEvaluation.getClinVarData(); // --> this should give the ClinicalSignificance
+////        var j = variantEvaluation.
+//
+//        Map<GeneStatistics, GeneEvaluation> geneCount =countOccurences(variantEvaluation.getGeneSymbol());
+//
+//
+//    }
 
     /**
      * PM3 "For recessive disorders, detected in trans with a pathogenic variant"

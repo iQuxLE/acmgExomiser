@@ -85,6 +85,13 @@ public class ClinVarAlleleParser extends VcfAlleleParser {
                     Map<String, ClinVarData.ClinSig> includedAlleles = parseIncludedAlleles(value);
                     clinVarBuilder.includedAlleles(includedAlleles);
                     break;
+                case "molecular consequece":
+                    //clinVarBuilder.molecularconsequence();
+                case "VariantEffect":
+                    //clinVarBuilder.variantEffect();
+                    // by this every VariantEvaluation has this as
+
+
                 default:
                     break;
             }

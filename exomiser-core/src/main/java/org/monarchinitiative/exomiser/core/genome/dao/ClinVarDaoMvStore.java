@@ -5,7 +5,9 @@ import org.h2.mvstore.MVStore;
 import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
 import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
 import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
+import org.monarchinitiative.exomiser.core.model.Gene;
 import org.monarchinitiative.exomiser.core.model.Variant;
+import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.*;
@@ -48,7 +50,36 @@ public class ClinVarDaoMvStore implements ClinVarDao {
                 .variant(contig, Strand.POSITIVE, Coordinates.oneBased(alleleKey.getPosition(), alleleKey.getPosition()), alleleKey.getRef(), alleleKey.getAlt()).build();
     }
 
-    @Override
+//    @Override
+//    public List<VariantEvaluation> getClinVarDataForGene(GenomicInterval genomicInterval, String geneSymbol) {
+//        Map<Gene, ClinVarData> results = new LinkedHashMap<>();
+//        //so we give it a genomic Interval, get the GeneSymbol and process all Variants with that geneSymbol
+//        // and the intervall before that will be calculated by a function
+//        // --> getIntervallForVariantEvaluationWithSpecficGeneSymbol
+//        // this returns the lowest and the highest int of positions from alleleKey.start (lowest) and alleleKey.end(highest)
+//        //
+//
+//    }
+//
+//    // in assignPP2 and BP1 we do a for loop and stream all variants with that geneSymbol and get the lowest postion.start and the highest
+//
+//    public GenomicInterval getGenomicIntervallOfGene(List<GenomicInterval> genomicIntervalList, String geneSymbol) {
+//        int lowestPosition = 0;
+//        int highestPostion = 0;
+////        Map<int, int> = new
+//        // need loop over GEneSymbol . . . ..
+//        for (GenomicInterval genomicInterval1 : genomicIntervalList){
+//            List<GenomicIntervaql> result = new ArrayList<>();
+//            int start = genomicInterval1.start();
+//            int end = genomicInterval1.end();
+//            if (start  )
+//
+//
+//        }
+//    }
+//
+
+        @Override
     public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval) {
         Map<GenomicVariant, ClinVarData> results = new LinkedHashMap<>();
         logger.debug("open ClinVarMap and show content: " + clinVarMap.size());

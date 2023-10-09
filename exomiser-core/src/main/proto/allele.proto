@@ -11,6 +11,7 @@ message AlleleKey {
     int32 position = 2;
     string ref = 3;
     string alt = 4;
+    string geneSymbol = 5;
 
 }
 
@@ -19,6 +20,10 @@ message AlleleProperties {
     map<string, float> properties = 2;
     //TODO: move to model or somewhere and then import here - this is also needed for output in results
     ClinVar clinVar = 3;
+}
+
+message VariantEffect {
+    VariantEffect variantEffect = 1;
 }
 
 message ClinVar {
