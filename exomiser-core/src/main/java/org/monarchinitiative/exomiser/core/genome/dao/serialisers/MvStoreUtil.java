@@ -22,6 +22,7 @@ package org.monarchinitiative.exomiser.core.genome.dao.serialisers;
 
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStatistics;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.AlleleKey;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.AlleleProperties;
@@ -41,6 +42,9 @@ public class MvStoreUtil {
     private static final Logger logger = LoggerFactory.getLogger(MvStoreUtil.class);
     private static final String ALLELE_MAP_NAME = "alleles";
     private static final String CLINVAR_MAP_NAME = "clinvar";
+
+    private static final String GENESTATS_MAP_NAME = "genestats";
+
     private MvStoreUtil() {
         //static utility class - not instantiable
     }
@@ -55,6 +59,10 @@ public class MvStoreUtil {
      */
     public static MVMap<AlleleKey, AlleleProperties> openAlleleMVMap(MVStore mvStore) {
         return openMap(mvStore, ALLELE_MAP_NAME, alleleMapBuilder());
+    }
+
+    public static MVMap<AlleleKey, AlleleProperties> openGeneStatsMVMap(MVStore mvStore) {
+        return openMap(mvStore, GENESTATS_MAP_NAME, alleleMapBuilder());
     }
 
     /**
@@ -86,6 +94,12 @@ public class MvStoreUtil {
                 .keyType(AlleleKeyDataType.INSTANCE)
                 .valueType(AllelePropertiesDataType.INSTANCE);
     }
+
+//    public static MVMap.Builder<ClinVarGeneStatistics> geneStatsMapBuilder() {
+//        return new MVMap.Builder<AlleleKey, AlleleProperties>()
+//                .keyType(AlleleKeyDataType.INSTANCE)
+//                .valueType(AllelePropertiesDataType.INSTANCE);
+//    }
 // TODO: separate this into AllelePropertiesMVMap and ClinVarMVMap classes?
     public static MVMap.Builder<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMapBuilder() {
         return new MVMap.Builder<AlleleProto.AlleleKey, AlleleProto.ClinVar>()
