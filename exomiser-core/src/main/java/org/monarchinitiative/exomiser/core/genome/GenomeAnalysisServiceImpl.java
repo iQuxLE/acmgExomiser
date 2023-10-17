@@ -24,6 +24,7 @@ import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencySource;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStatistics;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityData;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicitySource;
 import org.monarchinitiative.svart.GenomicInterval;
@@ -99,5 +100,10 @@ public class GenomeAnalysisServiceImpl implements GenomeAnalysisService {
     @Override
     public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval) {
         return variantDataService.findClinVarDataOverlappingGenomicInterval(genomicInterval);
+    }
+
+    @Override
+    public ClinVarGeneStatistics getClinVarGeneStats(VariantEvaluation variantEvaluation) {
+        return null;
     }
 }

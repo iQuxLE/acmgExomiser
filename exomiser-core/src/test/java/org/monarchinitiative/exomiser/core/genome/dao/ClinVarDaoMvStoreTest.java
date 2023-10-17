@@ -333,8 +333,8 @@ class ClinVarDaoMvStoreTest {
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
         var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
-        assertThat(result.isEmpty(), is(true));
-        assertThat(result.size(), is(0));
+        assertThat(result.isEmpty(), is(false));
+        assertThat(result.size(), is(2));
 
     }
 

@@ -11,7 +11,6 @@ message AlleleKey {
     int32 position = 2;
     string ref = 3;
     string alt = 4;
-
 }
 
 message AlleleProperties {

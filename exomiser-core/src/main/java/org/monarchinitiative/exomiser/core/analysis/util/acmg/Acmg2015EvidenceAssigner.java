@@ -247,60 +247,49 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
      * PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
      */
     public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
-
-        List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
-        if (annotations == null || annotations.isEmpty()){
-            logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
-            return;
-        }
-        TranscriptAnnotation transcriptAnnotation = annotations.get(0);
-        String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
-        String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
-        logger.debug("Input: " + transcriptAnnotation.getVariantEffect());
-        logger.debug("Input: " + variantAnnotator.annotate(variantEvaluation));
-        if (variantEvaluation.hasTranscriptAnnotations() && transcriptAnnotation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT) {
+        if (variantEvaluation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT){
+            List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
+            if (annotations == null || annotations.isEmpty()){
+                logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
+                return;
+            }
+            TranscriptAnnotation transcriptAnnotation = annotations.get(0);
+            String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
+            String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
             Map<GenomicVariant, ClinVarData> cvData = variantDataService.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2, 2));
             logger.debug("" + cvData);
 
             for (Map.Entry<GenomicVariant, ClinVarData> entry : cvData.entrySet()) {
-
+                GenomicVariant clinVarVariant = entry.getKey();
+                if (GenomicVariant.compare(clinVarVariant, variantEvaluation) == 0){
+                    // should be assigning PP5 or BP6
+                    continue;
+                }
                 ClinVarData.ClinSig clinicalSignificance = entry.getValue().getPrimaryInterpretation();
-                logger.debug("" + clinicalSignificance);
                 int starRating = entry.getValue().starRating();
-                logger.debug("" + starRating);
 
-                if (isPathOrLikelyPath(clinicalSignificance) && starRating >= 2) {
+                VariantType variantType = clinVarVariant.variantType();
+                if (isPathOrLikelyPath(clinicalSignificance) && starRating >= 2 && (variantType == VariantType.SNV || variantType == VariantType.MNV)) {
 
-                    int start = entry.getKey().start();
-                    int end = entry.getKey().end();
-                    String ref = entry.getKey().ref();
-                    String alt = entry.getKey().alt();
-
-                    List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(VariantEvaluation.builder()
-                            .variant(variantEvaluation.contig(), Strand.POSITIVE, Coordinates.oneBased(start, end), ref, alt).build());
-
+                    List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(clinVarVariant);
                     if (!annotatedVariantList.isEmpty()) {
 
                         VariantAnnotation variantAnnotation = annotatedVariantList.get(0);
-                        logger.debug("Proto: " + variantAnnotation);
+                        logger.debug("AnnotatedClinVarData: " + variantAnnotation);
 
                         if (variantAnnotation.hasTranscriptAnnotations()) {
                             VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
                             if (variantEffectFromVariantStore != VariantEffect.MISSENSE_VARIANT){
                                 return;
                             }
-                            logger.debug("Proto: " + variantEffectFromVariantStore);
                             TranscriptAnnotation transcriptAnnotationFromAnnotatedClinVarData = variantAnnotation.getTranscriptAnnotations().get(0);
-                            String proteinChangeFromProto = transcriptAnnotationFromAnnotatedClinVarData.getHgvsProtein();
-                            String cdnaChangeFromProto = transcriptAnnotationFromAnnotatedClinVarData.getHgvsCdna();
+                            String proteinChangeFromClinVar = transcriptAnnotationFromAnnotatedClinVarData.getHgvsProtein();
+                            String cdnaChangeFromClinVar = transcriptAnnotationFromAnnotatedClinVarData.getHgvsCdna();
 
-                            logger.debug("protoVariantChanges  " + proteinChangeFromProto + " " + cdnaChangeFromProto);
-                            logger.debug("inputVariantChanges  " + proteinChangeFromInput + " " + cdnaChangeFromInput);
-
-                            if (proteinChangeFromInput.equals(proteinChangeFromProto) && !cdnaChangeFromInput.equals(cdnaChangeFromProto)) {
+                            if (proteinChangeFromInput.equals(proteinChangeFromClinVar) && !cdnaChangeFromInput.equals(cdnaChangeFromClinVar)) {
                                 acmgEvidenceBuilder.add(PS1);
                             }
-                            if (!proteinChangeFromInput.equals(proteinChangeFromProto)) {
+                            if (!proteinChangeFromInput.equals(proteinChangeFromClinVar)) {
                                 acmgEvidenceBuilder.add(PM5);
                             }
                         }

@@ -124,11 +124,14 @@ class Acmg2015EvidenceAssignerTest {
     @ParameterizedTest
     @CsvSource({
             "10-123276892-C-G, true, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ diff cdna, same AAchange
+            "10-123276892-CG-AT, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ (no snp))
+            "10-123276892-CC-GG, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ mock of upper to test vs ref allele length > 1 (no snp)
             "10-123276893-A-T, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/ same cdna + same AAchange
             "10-123247514-C-A, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/ wrong codon
             "10-123247514-C-G, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/ wrong codon
             "10-299372-G-C, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/689498/ wrong chromosome + wrong codon
-            "11-123276893-A-T, false, false" // mocked Variant - wrong chromosome
+            "11-123276893-A-T, false, false", // mocked Variant - wrong chromosome
+ //           "10-123276893-AC-CT, false, true" // https://www.ncbi.nlm.nih.gov/clinvar/variation/2131381/ cDna c.1023-1024 // jannovar doesnt annotate to Missense but MNV
 
     })
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/

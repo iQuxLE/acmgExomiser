@@ -33,13 +33,11 @@ import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
 import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDaoMvStore;
 import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
 import org.monarchinitiative.exomiser.core.model.Variant;
+import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.frequency.Frequency;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencySource;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityScore;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicitySource;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.*;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
@@ -143,6 +141,11 @@ public class TestVariantDataService implements VariantDataService {
         return clinVarDao.findClinVarDataOverlappingGenomicInterval(genomicInterval);
     }
 
+    @Override
+    public ClinVarGeneStatistics getClinVarGeneStats(VariantEvaluation variantEvaluation) {
+        return null;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -219,6 +222,11 @@ public class TestVariantDataService implements VariantDataService {
         @Override
         public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval) {
             return Collections.emptyMap();
+        }
+
+        @Override
+        public ClinVarGeneStatistics getClinVarGeneStats(VariantEvaluation variantEvaluation) {
+            return null;
         }
 
         @Override

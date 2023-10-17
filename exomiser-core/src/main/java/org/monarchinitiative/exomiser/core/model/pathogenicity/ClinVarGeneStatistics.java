@@ -58,7 +58,7 @@ import java.util.Map;
 
 import java.util.*;
 
-    public static class ClinVarGeneStatistics {
+    public class ClinVarGeneStatistics {
         private final List<ClinVarData.ClinSig> clinSigList;
         private final List<VariantEffect> molecularConsequenceList;
         private final String geneSymbol;
@@ -68,11 +68,9 @@ import java.util.*;
             this.clinSigList = clinSigList;
             this.molecularConsequenceList = molecularConsequenceList;
         }
-
-        // getters and other methods
     }
 
-    public static class GeneStatsBuilder {
+     class GeneStatsBuilder {
         private final Map<String, ClinVarGeneStatistics> geneStatsMap = new HashMap<>();
         private List<ClinVarData.ClinSig> clinSigList = new ArrayList<>();
         private List<VariantEffect> molecularConsequenceList = new ArrayList<>();
@@ -103,6 +101,6 @@ import java.util.*;
             return geneStatsMap;
         }
     }
-}
+
 
 

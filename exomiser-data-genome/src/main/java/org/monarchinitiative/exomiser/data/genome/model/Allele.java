@@ -48,7 +48,7 @@ public class Allele implements Comparable<Allele> {
     private ClinVarData clinVarData = null;
     private final Map<AlleleProperty, Float> values = new EnumMap<>(AlleleProperty.class);
 
-    public Allele(int chr, int pos, String ref, String alt, @Nullable String geneSymbol, @Nullable VariantEffect molecularConsequence) {
+    public Allele(int chr, int pos, String ref, String alt) {
         this.chr = chr;
         this.pos = pos;
         this.ref = ref;

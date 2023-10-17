@@ -45,7 +45,7 @@ public class ClinVarDaoMvStore implements ClinVarDao {
 
     public GenomicVariant alleleKeyToGenomicVariant(AlleleProto.AlleleKey alleleKey, Contig contig) {
         return GenomicVariant.builder()
-                .variant(contig, Strand.POSITIVE, Coordinates.oneBased(alleleKey.getPosition(), alleleKey.getPosition()), alleleKey.getRef(), alleleKey.getAlt()).build();
+                .variant(contig, Strand.POSITIVE, Coordinates.ofAllele(CoordinateSystem.oneBased(), alleleKey.getPosition(), alleleKey.getRef()), alleleKey.getRef(), alleleKey.getAlt()).build();
     }
 
     @Override
@@ -82,8 +82,7 @@ public class ClinVarDaoMvStore implements ClinVarDao {
         while (keyIterator.hasNext() ) {
             AlleleProto.AlleleKey ak = keyIterator.next();
             // don't process keys out of the initial boundaries
-            if (ak.getPosition() >= start && ak.getPosition() <= end
-                    && (ak.getRef().length() <= 1 && ak.getAlt().length() <= 1)) {
+            if (ak.getPosition() >= start && ak.getPosition() <= end ){
 
                 GenomicVariant gvFromAk = alleleKeyToGenomicVariant(ak, contig);
                 ClinVarData cvData = getClinVarDataFromGenomicVariant(gvFromAk);
