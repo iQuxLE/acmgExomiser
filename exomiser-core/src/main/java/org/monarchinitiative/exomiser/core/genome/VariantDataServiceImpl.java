@@ -200,9 +200,8 @@ public class VariantDataServiceImpl implements VariantDataService {
     }
 
     @Override
-    public ClinVarGeneStatistics getClinVarGeneStats(VariantEvaluation variantEvaluation) {
-        return null;
-//        return geneStatsDao.getGeneStats(variantEvaluation.getGeneSymbol());
+    public ClinVarGeneStats getClinVarGeneStats(String geneSymbol) {
+        return clinVarDao.getClinVarGeneStats(geneSymbol);
     }
 
     public static Builder builder() {

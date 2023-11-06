@@ -20,16 +20,22 @@
 
 package org.monarchinitiative.exomiser.core.genome.dao.serialisers;
 
+import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
+import org.h2.mvstore.type.ObjectDataType;
+import org.h2.mvstore.type.StringDataType;
 import org.junit.jupiter.api.Test;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStats;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.AlleleKey;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.AlleleProperties;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.ClinVar;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -65,5 +71,21 @@ public class MvStoreUtilTest {
         MVMap.Builder<AlleleKey, ClinVar> alleleMapBuilder = MvStoreUtil.clinVarMapBuilder();
         assertThat(alleleMapBuilder.getKeyType(), equalTo(AlleleKeyDataType.INSTANCE));
         assertThat(alleleMapBuilder.getValueType(), equalTo(ClinVarDataType.INSTANCE));
+    }
+    @Test
+    public void clinVarGeneStatsBuilder() {
+        MVMap.Builder<String, ClinVarGeneStats> geneStatsMapBuilder = MvStoreUtil.geneStatsMapBuilder();
+        assertThat(geneStatsMapBuilder.getKeyType(), equalTo(StringDataType.INSTANCE));
+        assertThat(geneStatsMapBuilder.getValueType(), instanceOf(ObjectDataType.class));
+    }
+
+    @Test
+    public void openClinVarGeneStatsMVMap(){
+        MVStore mvStore = new MVStore.Builder().open();
+        MVMap<String, ClinVarGeneStats> map = MvStoreUtil.openGeneStatsMVMap(mvStore);
+        map.put("TEST", new ClinVarGeneStats("TEST", Map.of(VariantEffect.MISSENSE_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 1))));
+        assertThat(map.isEmpty(), is(false));
+        assertThat(mvStore.hasMap("genestats"), is(true));
+        assertThat(map.get("TEST"), equalTo(Map.of(VariantEffect.MISSENSE_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 1))));
     }
 }

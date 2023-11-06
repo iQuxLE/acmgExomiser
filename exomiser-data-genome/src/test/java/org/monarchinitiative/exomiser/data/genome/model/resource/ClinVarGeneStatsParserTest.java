@@ -2,6 +2,16 @@ package org.monarchinitiative.exomiser.data.genome.model.resource;
 
 
 import org.junit.jupiter.api.Test;
+import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
+import org.monarchinitiative.exomiser.core.genome.JannovarVariantAnnotator;
+import org.monarchinitiative.exomiser.core.genome.VariantAnnotator;
+import org.monarchinitiative.exomiser.core.model.ChromosomalRegionIndex;
+import org.monarchinitiative.exomiser.core.model.VariantAnnotation;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicVariant;
+import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.util.VariantTrimmer;
+
 
 import java.awt.image.DataBufferDouble;
 import java.io.*;
@@ -11,7 +21,23 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
+
+
 class ClinVarGeneStatsParserTest {
+//    private final JannovarVariantAnnotator instance = new JannovarVariantAnnotator(TestFactory.getDefaultGenomeAssembly(), TestFactory
+//            .buildDefaultJannovarData(), ChromosomalRegionIndex.empty());
+
+    private List<VariantAnnotation> annotate(VariantAnnotator instance, String contig, int start, String ref, String alt) {
+        GenomicVariant variant = variant(contig, start, ref, alt);
+        return instance.annotate(variant);
+    }
+
+    private GenomicVariant variant(String contig, int start, String ref, String alt) {
+        VariantTrimmer.VariantPosition variantPosition = VariantTrimmer.leftShiftingTrimmer(VariantTrimmer.retainingCommonBase()).trim(Strand.POSITIVE, start, ref, alt);
+        return GenomicVariant.of(GenomeAssembly.HG19.getContigByName(contig), Strand.POSITIVE, CoordinateSystem.ONE_BASED, variantPosition.start(), variantPosition.ref(), variantPosition.alt());
+    }
+
+
 
     @Test
     void testMethodsStart() {
@@ -131,8 +157,9 @@ class ClinVarGeneStatsParserTest {
     @Test
     void singleAndMultiMCCountPerGeneTxt() {
         Path path = Path.of("/Users/carlo/Downloads/clinvar.vcf.gz");
+        Map<String, List<Integer>> geneCounts = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(path))));
-             BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/carlo/Desktop/GeneTableStart/geneCountsCombined.txt"))) {
+             BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/carlo/Desktop/GeneTableStart/geneCountsCombinedAndTotal.tsv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith("#")) continue;
@@ -146,20 +173,20 @@ class ClinVarGeneStatsParserTest {
                 if (mc != null && geneInfo != null) {
                     for (String geneString : geneInfo.split("\\|")) {
                         String geneSymbol = geneString.split(":")[0];
-                        Map<String, List<Integer>> geneCounts = new HashMap<>();
-                        geneCounts.putIfAbsent(geneSymbol, new ArrayList<>(List.of(0, 0)));
+                        geneCounts.putIfAbsent(geneSymbol, new ArrayList<>(List.of(0, 0, 0)));
                         if (mc.contains(",")) {
                             geneCounts.get(geneSymbol).set(1, geneCounts.get(geneSymbol).get(1) + 1);
                         } else {
                             geneCounts.get(geneSymbol).set(0, geneCounts.get(geneSymbol).get(0) + 1);
                         }
+                        geneCounts.get(geneSymbol).set(2, geneCounts.get(geneSymbol).get(2) + 1);
                     }
                 }
             }
-            bw.write("gene_symbol\tsingle_count\tmulti_count\n");
+            bw.write("gene_symbol\tsingle_count\tmulti_count\ttotal\n");
             geneCounts.forEach((k, v) -> {
                 try {
-                    bw.write(k + "\t" + v.get(0) + "\t" + v.get(1));
+                    bw.write(k + "\t" + v.get(0) + "\t" + v.get(1) + "\t" + v.get(2));
                     bw.newLine();
                 } catch (IOException e) {
                     e.printStackTrace();

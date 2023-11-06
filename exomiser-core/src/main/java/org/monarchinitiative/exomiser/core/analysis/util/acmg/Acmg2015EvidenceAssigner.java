@@ -25,6 +25,8 @@ import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraint;
 import org.monarchinitiative.exomiser.core.analysis.util.GeneConstraints;
 import org.monarchinitiative.exomiser.core.analysis.util.InheritanceModeAnalyser;
+import org.monarchinitiative.exomiser.core.analysis.util.acmg.v3categories.BP1PP2Assigner;
+import org.monarchinitiative.exomiser.core.analysis.util.acmg.v3categories.PS1PM5Assigner;
 import org.monarchinitiative.exomiser.core.genome.*;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual;
@@ -103,12 +105,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         // PVS1 "null variant (nonsense, frameshift, canonical ±1 or 2 splice sites, initiation codon, single or multiexon deletion) in a gene where LOF is a known mechanism of disease"
         assignPVS1(acmgEvidenceBuilder, variantEvaluation, modeOfInheritance, knownDiseases);
 
-        // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
-        // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
-        // PM5: "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
-            assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
-
-
         if (pedigree.containsId(probandId)) {
             Individual proband = pedigree.getIndividualById(probandId);
             // PS2 "De novo (both maternity and paternity confirmed) in a patient with the disease and no family history"
@@ -131,7 +127,19 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         assignPM4(acmgEvidenceBuilder, variantEvaluation);
         // TODO: PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before
 
-        // PP4 "Patient’s phenotype or family history is highly specific for a disease with a single genetic etiology"
+        // PP2 "Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease"
+        // BP1 "Missense variant in a gene for which primarily truncating variants are known to cause disease"
+        BP1PP2Assigner bp1PP2Assigner = new BP1PP2Assigner(variantDataService);
+        bp1PP2Assigner.assign(acmgEvidenceBuilder, variantEvaluation);
+
+        // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
+        // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
+        // PM5: "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
+        PS1PM5Assigner ps1PM5Assigner = new PS1PM5Assigner(variantDataService, variantAnnotator);
+        ps1PM5Assigner.assignPS1orPM5(acmgEvidenceBuilder,variantEvaluation);
+
+
+            // PP4 "Patient’s phenotype or family history is highly specific for a disease with a single genetic etiology"
         assignPP4(acmgEvidenceBuilder, compatibleDiseaseMatches);
 
         PathogenicityData pathogenicityData = variantEvaluation.getPathogenicityData();
@@ -148,14 +156,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         assignPP3orBP4(acmgEvidenceBuilder, pathogenicityData);
 
         return acmgEvidenceBuilder.build();
-    }
-
-    private boolean hasVariantDataService() {
-        return variantDataService != null;
-    }
-
-    private boolean hasVariantAnnotator() {
-        return variantAnnotator != null;
     }
 
     /**
@@ -243,63 +243,6 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
     }
 
     /**
-     * PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
-     * PM5 "Novel missense change at an amino acid residue where a different missense change determined to be pathogenic has been seen before"
-     */
-    public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
-        if (variantEvaluation.getVariantEffect() == VariantEffect.MISSENSE_VARIANT){
-            List<TranscriptAnnotation> annotations = variantEvaluation.getTranscriptAnnotations();
-            if (annotations == null || annotations.isEmpty()){
-                logger.warn("TranscriptAnnotation is empty for variantEvaluation: {}", variantEvaluation);
-                return;
-            }
-            TranscriptAnnotation transcriptAnnotation = annotations.get(0);
-            String proteinChangeFromInput = transcriptAnnotation.getHgvsProtein();
-            String cdnaChangeFromInput = transcriptAnnotation.getHgvsCdna();
-            Map<GenomicVariant, ClinVarData> cvData = variantDataService.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2, 2));
-            logger.debug("" + cvData);
-
-            for (Map.Entry<GenomicVariant, ClinVarData> entry : cvData.entrySet()) {
-                GenomicVariant clinVarVariant = entry.getKey();
-                if (GenomicVariant.compare(clinVarVariant, variantEvaluation) == 0){
-                    // should be assigning PP5 or BP6
-                    continue;
-                }
-                ClinVarData.ClinSig clinicalSignificance = entry.getValue().getPrimaryInterpretation();
-                int starRating = entry.getValue().starRating();
-
-                VariantType variantType = clinVarVariant.variantType();
-                if (isPathOrLikelyPath(clinicalSignificance) && starRating >= 2 && (variantType == VariantType.SNV || variantType == VariantType.MNV)) {
-
-                    List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(clinVarVariant);
-                    if (!annotatedVariantList.isEmpty()) {
-
-                        VariantAnnotation variantAnnotation = annotatedVariantList.get(0);
-                        logger.debug("AnnotatedClinVarData: " + variantAnnotation);
-
-                        if (variantAnnotation.hasTranscriptAnnotations()) {
-                            VariantEffect variantEffectFromVariantStore = variantAnnotation.getVariantEffect();
-                            if (variantEffectFromVariantStore != VariantEffect.MISSENSE_VARIANT){
-                                return;
-                            }
-                            TranscriptAnnotation transcriptAnnotationFromAnnotatedClinVarData = variantAnnotation.getTranscriptAnnotations().get(0);
-                            String proteinChangeFromClinVar = transcriptAnnotationFromAnnotatedClinVarData.getHgvsProtein();
-                            String cdnaChangeFromClinVar = transcriptAnnotationFromAnnotatedClinVarData.getHgvsCdna();
-
-                            if (proteinChangeFromInput.equals(proteinChangeFromClinVar) && !cdnaChangeFromInput.equals(cdnaChangeFromClinVar)) {
-                                acmgEvidenceBuilder.add(PS1);
-                            }
-                            if (!proteinChangeFromInput.equals(proteinChangeFromClinVar)) {
-                                acmgEvidenceBuilder.add(PM5);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * PM3 "For recessive disorders, detected in trans with a pathogenic variant"
      * Note: This requires testing of parents (or offspring) to determine phase
      */
@@ -349,16 +292,11 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
                 && thisVariantGenotype.equals(otherVariantGenotype);
     }
 
-    private boolean isMissense(VariantEffect variantEffect) {
-        return variantEffect == VariantEffect.MISSENSE_VARIANT;
-    }
-
     /**
      * PP5 "Reputable source recently reports variant as pathogenic, but the evidence is not available to the laboratory to perform an independent evaluation"
      */
     private void assignPP5(AcmgEvidence.Builder acmgEvidenceBuilder, ClinVarData clinVarData) {
-        ClinVarData.ClinSig primaryInterpretation = clinVarData.getPrimaryInterpretation();
-        boolean pathOrLikelyPath = isPathOrLikelyPath(primaryInterpretation);
+        boolean pathOrLikelyPath = clinVarData.isPathOrLikelyPath();
         if (pathOrLikelyPath && clinVarData.starRating() == 1) {
             acmgEvidenceBuilder.add(PP5);
         } else if (pathOrLikelyPath && clinVarData.starRating() >= 2) {
@@ -366,9 +304,12 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
         }
     }
 
-    private boolean isPathOrLikelyPath(ClinVarData.ClinSig clinSig) {
-        return clinSig == ClinVarData.ClinSig.PATHOGENIC || clinSig == ClinVarData.ClinSig.LIKELY_PATHOGENIC || clinSig == ClinVarData.ClinSig.PATHOGENIC_OR_LIKELY_PATHOGENIC;
+    public void assignPS1orPM5(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
+        PS1PM5Assigner ps1PM5Assigner =  new PS1PM5Assigner(variantDataService, variantAnnotator);
+        ps1PM5Assigner.assignPS1orPM5(acmgEvidenceBuilder, variantEvaluation);
+
     }
+
 
     /**
      * BP6 "Reputable source recently reports variant as benign, but the evidence is not available to the laboratory to perform an independent evaluation"

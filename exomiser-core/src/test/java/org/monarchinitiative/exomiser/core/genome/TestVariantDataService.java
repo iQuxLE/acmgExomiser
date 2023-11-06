@@ -27,6 +27,7 @@ package org.monarchinitiative.exomiser.core.genome;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.monarchinitiative.exomiser.core.genome.dao.ClinVarDao;
@@ -63,7 +64,9 @@ public class TestVariantDataService implements VariantDataService {
     private final Map<Variant, PathogenicityData> expectedPathogenicityData;
     private final MVStore mvStore;
     private final ClinVarDao clinVarDao;
-    private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
+    private final MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
+    private final MVMap<String, ClinVarGeneStats> clinVarGeneStatsMap;
+
 
 
     private TestVariantDataService(Builder builder) {
@@ -74,6 +77,8 @@ public class TestVariantDataService implements VariantDataService {
         this.genomeAssembly = builder.genomeAssembly;
         this.clinVarDao = new ClinVarDaoMvStore(builder.mvStore, builder.genomeAssembly);
         this.clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
+        this.clinVarGeneStatsMap = MvStoreUtil.openGeneStatsMVMap(mvStore);
+
         }
 
     /**
@@ -142,8 +147,8 @@ public class TestVariantDataService implements VariantDataService {
     }
 
     @Override
-    public ClinVarGeneStatistics getClinVarGeneStats(VariantEvaluation variantEvaluation) {
-        return null;
+    public ClinVarGeneStats getClinVarGeneStats(String geneSymbol) {
+        return clinVarDao.getClinVarGeneStats(geneSymbol);
     }
 
     public static Builder builder() {
@@ -155,18 +160,11 @@ public class TestVariantDataService implements VariantDataService {
         private Map<Variant, FrequencyData> expectedFrequencyData = new HashMap<>();
         private Map<Variant, PathogenicityData> expectedPathogenicityData = new HashMap<>();
 
-        private GenomeAssembly genomeAssembly;
-        private MVStore mvStore = new MVStore.Builder().open();;
-        private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
+        private GenomeAssembly genomeAssembly = GenomeAssembly.HG19;
+        private MVStore mvStore = new MVStore.Builder().open();
+        private MVMap<String, ClinVarGeneStats> clinVarGeneStatsMap = MvStoreUtil.openGeneStatsMVMap((mvStore));
 
-        public Builder setMVStore(MVStore store) {
-            this.mvStore = store;
-            if(mvStore == null) {
-                throw new IllegalArgumentException("MVStore is not initialized!");
-            }
-            this.clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
-            return this;
-        }
+        private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
 
         public Builder setGenomeAssembly(GenomeAssembly genomeAssembly){
             this.genomeAssembly = genomeAssembly;
@@ -179,10 +177,12 @@ public class TestVariantDataService implements VariantDataService {
         }
 
         public Builder put(AlleleProto.AlleleKey AlleleKey, AlleleProto.ClinVar ClinVar){
-            if (clinVarMap == null) {
-                throw new IllegalStateException("MVMap is not initialized. Ensure you have called setMVStore() before using put().");
-            }
             this.clinVarMap.put(AlleleKey, ClinVar);
+            return this;
+        }
+
+        public Builder put(String geneSymbol, ClinVarGeneStats clinVarGeneStats) {
+            this.clinVarGeneStatsMap.put(geneSymbol, clinVarGeneStats);
             return this;
         }
 
@@ -225,8 +225,8 @@ public class TestVariantDataService implements VariantDataService {
         }
 
         @Override
-        public ClinVarGeneStatistics getClinVarGeneStats(VariantEvaluation variantEvaluation) {
-            return null;
+        public ClinVarGeneStats getClinVarGeneStats(String geneSymbol){
+            return ClinVarGeneStats.empty();
         }
 
         @Override

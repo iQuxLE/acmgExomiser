@@ -64,6 +64,36 @@ public class JannovarVariantAnnotatorTest {
     }
 
     @Test
+    void CarloTests() {
+//        should be ORAF4 and other variant (first in vcf)
+        List<VariantAnnotation> annotations = annotate(instance, "1", 69134, "A", "G");
+//        MC=SO:0001583|missense_variant
+        List<VariantAnnotation> annotationsK = annotate(instance, "10", 123247514, "C", "A");
+//        MC=SO:0001583|missense_variant,SO:0001619|non-coding_transcript_variant
+        List<VariantAnnotation> annotationsL = annotate(instance, "10", 123247517, "T", "A");
+//        MC=SO:0001583|missense_variant,SO:0001619|non-coding_transcript_variant
+        List<VariantAnnotation> annotationsO = annotate(instance, "10", 123247519, "T", "C");
+//        MC=SO:0001583|missense_variant,SO:0001619|non-coding_transcript_variant
+        List<VariantAnnotation> annotationsP = annotate(instance, "10", 123247531, "T", "C");
+        List<VariantAnnotation> annotationsI = annotate(instance, "10", 123247541, "ATCT", "A");
+        List<VariantAnnotation> annotationsY = annotate(instance, "8", 133584375, "T", "C");
+        //10-120928033-G-T
+        List<VariantAnnotation> annotationsR = annotate(instance, "10", 120928033, "G", "T");
+        VariantAnnotation variantAnnotation = annotations.get(0);
+//        TranscriptAnnotation transcriptAnnotation = variantAnnotation.getTranscriptAnnotations().get(0);
+
+        System.out.println(annotations);
+        System.out.println(annotationsR);
+        System.out.println(annotationsY);
+        System.out.println(annotationsK);
+        System.out.println(annotationsL);
+        System.out.println(annotationsO);
+        System.out.println(annotationsP);
+        System.out.println(annotationsI);
+
+    }
+
+    @Test
     void testAnnotateMissenseVariant() {
         // This transcript is on the negative strand
         // TranscriptModel Gene=FGFR2 accession=uc021pzz.1 Chr10 Strand=- seqLen=4654
