@@ -20,12 +20,11 @@
 
 package org.monarchinitiative.exomiser.core.genome;
 
+import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencySource;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicitySource;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.*;
 import org.monarchinitiative.svart.GenomicInterval;
 import org.monarchinitiative.svart.GenomicVariant;
 
@@ -99,5 +98,9 @@ public class GenomeAnalysisServiceImpl implements GenomeAnalysisService {
     @Override
     public Map<GenomicVariant, ClinVarData> findClinVarDataOverlappingGenomicInterval(GenomicInterval genomicInterval) {
         return variantDataService.findClinVarDataOverlappingGenomicInterval(genomicInterval);
+    }
+    @Override
+    public ClinVarGeneStats getClinVarGeneStats(String geneSymbol) {
+        return variantDataService.getClinVarGeneStats(geneSymbol);
     }
 }

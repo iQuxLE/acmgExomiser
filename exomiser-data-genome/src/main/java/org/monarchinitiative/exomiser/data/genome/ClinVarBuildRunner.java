@@ -3,16 +3,23 @@ package org.monarchinitiative.exomiser.data.genome;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.MVStoreTool;
+import org.monarchinitiative.exomiser.core.genome.GenomeAssembly;
+import org.monarchinitiative.exomiser.core.genome.VariantAnnotator;
 import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
+import org.monarchinitiative.exomiser.core.model.VariantAnnotation;
+import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.exomiser.data.genome.indexers.AlleleConverter;
 import org.monarchinitiative.exomiser.data.genome.model.Allele;
 import org.monarchinitiative.exomiser.data.genome.model.BuildInfo;
 import org.monarchinitiative.exomiser.data.genome.model.resource.ClinVarAlleleResource;
+import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil.clinVarMapBuilder;
@@ -25,6 +32,8 @@ public class ClinVarBuildRunner {
     private final BuildInfo buildInfo;
     private final ClinVarAlleleResource clinVarAlleleResource;
     private final Path outFile;
+
+    private VariantAnnotator variantAnnotator;
 
     public ClinVarBuildRunner(BuildInfo buildInfo, Path outDir, ClinVarAlleleResource clinVarAlleleResource) {
         this.outDir = outDir.toAbsolutePath();
@@ -45,7 +54,14 @@ public class ClinVarBuildRunner {
             try(Stream<Allele> alleleStream = clinVarAlleleResource.parseResource()) {
                 alleleStream
                         .forEach(allele -> {
+                            // for each alleleAnnotate to get geneSymbol, geneID and molecularConsequence but build another geneStatsMap
                             var alleleKey = AlleleConverter.toAlleleKey(allele);
+                            var a = alleleKey.getChr();
+                            var b = alleleKey.getPosition();
+                            var c = alleleKey.getRef();
+                            var d = alleleKey.getAlt();
+                            List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(VariantEvaluation.builder()
+                                    .variant(GenomeAssembly.HG19.getContigById(a), Strand.POSITIVE, Coordinates.oneBased(b, b), c, d).build());
                             var clinvarProto = AlleleConverter.toProtoClinVar(allele.getClinVarData());
                             clinVarMap.put(alleleKey, clinvarProto);
                         });

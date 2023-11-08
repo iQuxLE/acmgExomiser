@@ -22,6 +22,8 @@ package org.monarchinitiative.exomiser.core.analysis.util.acmg;
 
 import de.charite.compbio.jannovar.annotation.VariantEffect;
 import de.charite.compbio.jannovar.mendel.ModeOfInheritance;
+import org.checkerframework.checker.units.qual.A;
+import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,21 +31,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.exomiser.core.genome.*;
 
+import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
 import org.monarchinitiative.exomiser.core.model.*;
 import org.monarchinitiative.exomiser.core.model.Pedigree.Individual;
 import org.monarchinitiative.exomiser.core.model.frequency.Frequency;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencySource;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityScore;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicitySource;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.*;
 import org.monarchinitiative.exomiser.core.phenotype.ModelPhenotypeMatch;
 import org.monarchinitiative.exomiser.core.prioritisers.model.Disease;
 import org.monarchinitiative.exomiser.core.prioritisers.model.InheritanceMode;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -69,11 +70,13 @@ class Acmg2015EvidenceAssignerTest {
             .setReviewStatus("criteria provided, multiple submitters, no conflicts")
             .build();
 
-    private final MVStore mvStore = new MVStore.Builder().compress().open();
+
+    private MVStore mvStore(){
+        return new MVStore.Builder().compress().open();
+    }
 
     private VariantDataService initializeCustomVariantDataservice(AlleleProto.ClinVar cvInterpretation, AlleleProto.AlleleKey... alleleKeys){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
-                .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
         for (AlleleProto.AlleleKey alleleKey : alleleKeys){
             builder.put(alleleKey,cvInterpretation);
@@ -83,8 +86,15 @@ class Acmg2015EvidenceAssignerTest {
 
     private VariantDataService initializeVariantDataservice(){
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
-                .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
+
+        return builder.build();
+    }
+
+    private VariantDataService variantDataServiceForGeneStats(String geneSymbol, ClinVarGeneStats stats){
+        TestVariantDataService.Builder builder = TestVariantDataService.builder()
+                .setGenomeAssembly(GenomeAssembly.HG19);
+        builder.put(geneSymbol, stats);
         return builder.build();
     }
 
@@ -124,11 +134,14 @@ class Acmg2015EvidenceAssignerTest {
     @ParameterizedTest
     @CsvSource({
             "10-123276892-C-G, true, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ diff cdna, same AAchange
+            "10-123276892-CG-AT, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ (no snp))
+            "10-123276892-CC-GG, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/374820/ mock of upper to test vs ref allele length > 1 (no snp)
             "10-123276893-A-T, false, false",  // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/ same cdna + same AAchange
             "10-123247514-C-A, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/1698211/ wrong codon
             "10-123247514-C-G, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/661397/ wrong codon
             "10-299372-G-C, false, false", // https://www.ncbi.nlm.nih.gov/clinvar/variation/689498/ wrong chromosome + wrong codon
-            "11-123276893-A-T, false, false" // mocked Variant - wrong chromosome
+            "11-123276893-A-T, false, false", // mocked Variant - wrong chromosome
+ //           "10-123276893-AC-CT, false, true" // https://www.ncbi.nlm.nih.gov/clinvar/variation/2131381/ cDna c.1023-1024 // jannovar doesnt annotate to Missense but MNV
 
     })
     // https://www.ncbi.nlm.nih.gov/clinvar/variation/13267/
@@ -850,4 +863,25 @@ class Acmg2015EvidenceAssignerTest {
 
         assertThat(acmgEvidence, equalTo(AcmgEvidence.builder().add(BS4).build()));
     }
+
+//    @Test
+//    void testRatio() {
+////        VariantDataService variantDataService = initializeCustomVariantDataservice(clinVarPathogenicStarRating2, variant);
+//        ClinVarGeneStats clinVarGeneStats = new ClinVarGeneStats("Test", Map.of(VariantEffect.MISSENSE_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 12, ClinVarData.ClinSig.BENIGN, 2)));
+////        MVStore mvStore = mvStore();
+//        VariantDataService variantDataService = variantDataServiceForGeneStats("Test", clinVarGeneStats);
+//
+////        MVMap<String, ClinVarGeneStats> stringClinVarGeneStatsMVMap = MvStoreUtil.openGeneStatsMVMap(mvStore);
+////        stringClinVarGeneStatsMVMap.put("Test", clinVarGeneStats);
+////        variantDataService.getClinVarGeneStats("Test");
+//        Acmg2015EvidenceAssigner assigner = new Acmg2015EvidenceAssigner("proband", justProband("proband", MALE), jannovarAnnotator, variantDataService);
+//        VariantEvaluation variantEvaluation = buildVariantEvaluation(10, 123247514, "C", "A",
+//                "p.(Lys659Asn)", "c.1977G>T", "FGFR2", VariantEffect.MISSENSE_VARIANT);
+//
+//        AcmgEvidence.Builder builder = AcmgEvidence.builder();
+//
+//        assigner.assignPP2(builder, variantEvaluation);
+//        assertThat(builder.contains(AcmgCriterion.PP2), is(true));
+//
+//    }
 }

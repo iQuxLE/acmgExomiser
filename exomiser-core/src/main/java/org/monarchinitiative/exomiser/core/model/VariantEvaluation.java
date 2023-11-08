@@ -597,6 +597,10 @@ public class VariantEvaluation extends AbstractVariant implements Comparable<Var
     public static VariantEvaluation.Builder with(Variant variant) {
         return new Builder().variant(variant);
     }
+    public static VariantEvaluation.Builder with(GenomicVariant variant) {
+        return new Builder().variant(variant);
+    }
+
 
     public static Builder builder() {
         return new Builder();

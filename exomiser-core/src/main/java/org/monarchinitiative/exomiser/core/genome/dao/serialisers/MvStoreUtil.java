@@ -20,14 +20,21 @@
 
 package org.monarchinitiative.exomiser.core.genome.dao.serialisers;
 
+import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
+import org.h2.mvstore.type.ObjectDataType;
+import org.h2.mvstore.type.StringDataType;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStatistics;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStats;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.AlleleKey;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto.AlleleProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -41,6 +48,9 @@ public class MvStoreUtil {
     private static final Logger logger = LoggerFactory.getLogger(MvStoreUtil.class);
     private static final String ALLELE_MAP_NAME = "alleles";
     private static final String CLINVAR_MAP_NAME = "clinvar";
+
+    private static final String GENESTATS_MAP_NAME = "genestats";
+
     private MvStoreUtil() {
         //static utility class - not instantiable
     }
@@ -55,6 +65,10 @@ public class MvStoreUtil {
      */
     public static MVMap<AlleleKey, AlleleProperties> openAlleleMVMap(MVStore mvStore) {
         return openMap(mvStore, ALLELE_MAP_NAME, alleleMapBuilder());
+    }
+
+    public static MVMap<String, ClinVarGeneStats> openGeneStatsMVMap(MVStore mvStore) {
+        return openMap(mvStore, GENESTATS_MAP_NAME, geneStatsMapBuilder());
     }
 
     /**
@@ -85,6 +99,12 @@ public class MvStoreUtil {
         return new MVMap.Builder<AlleleKey, AlleleProperties>()
                 .keyType(AlleleKeyDataType.INSTANCE)
                 .valueType(AllelePropertiesDataType.INSTANCE);
+    }
+
+    public static MVMap.Builder<String, ClinVarGeneStats> geneStatsMapBuilder() {
+        return new MVMap.Builder<String, ClinVarGeneStats>()
+                .keyType(StringDataType.INSTANCE)
+                .valueType(new ObjectDataType());
     }
 // TODO: separate this into AllelePropertiesMVMap and ClinVarMVMap classes?
     public static MVMap.Builder<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMapBuilder() {

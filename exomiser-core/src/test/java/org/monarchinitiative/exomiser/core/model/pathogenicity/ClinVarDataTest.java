@@ -21,7 +21,10 @@
 package org.monarchinitiative.exomiser.core.model.pathogenicity;
 
 import com.google.common.collect.ImmutableMap;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData.ClinSig;
 
 import java.util.Collections;
@@ -122,5 +125,20 @@ public class ClinVarDataTest {
                 .secondaryInterpretations(Set.of(secondaryInterpretations))
                 .build()
                 .isSecondaryAssociationRiskFactorOrOther();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "PATHOGENIC, true",
+            "PATHOGENIC_OR_LIKELY_PATHOGENIC, true",
+            "LIKELY_PATHOGENIC, true",
+            "BENIGN, false",
+            "LIKELY_BENIGN, false"
+    })
+    void isPathOrLikelyPath(ClinSig clinSig, boolean expected) {
+        ClinVarData clinVarDataPathogenic = ClinVarData.builder()
+                .primaryInterpretation(clinSig)
+                .build();
+        assertThat(clinVarDataPathogenic.isPathOrLikelyPath(), equalTo(expected));
     }
 }

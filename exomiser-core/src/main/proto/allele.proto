@@ -11,7 +11,6 @@ message AlleleKey {
     int32 position = 2;
     string ref = 3;
     string alt = 4;
-
 }
 
 message AlleleProperties {
@@ -43,9 +42,81 @@ message ClinVar {
         RISK_FACTOR = 14;
     }
 
+    enum VariantEffect {
+        CHROMOSOME_NUMBER_VARIATION = 0;
+        TRANSCRIPT_ABLATION = 1;
+        EXON_LOSS_VARIANT = 2;
+        INVERSION = 3;
+        INSERTION = 4;
+        TRANSLOCATION = 5;
+        FRAMESHIFT_ELONGATION = 6;
+        FRAMESHIFT_TRUNCATION = 7;
+        FRAMESHIFT_VARIANT = 8;
+        INTERNAL_FEATURE_ELONGATION = 9;
+        FEATURE_TRUNCATION = 10;
+        TRANSCRIPT_AMPLIFICATION = 11;
+        COPY_NUMBER_CHANGE = 12;
+        MNV = 13;
+        COMPLEX_SUBSTITUTION = 14;
+        STOP_GAINED = 15;
+        STOP_LOST = 16;
+        START_LOST = 17;
+        SPLICE_ACCEPTOR_VARIANT = 18;
+        SPLICE_DONOR_VARIANT = 19;
+        RARE_AMINO_ACID_VARIANT = 20;
+        _SMALLEST_HIGH_IMPACT = 21;
+        MISSENSE_VARIANT = 22;
+        INFRAME_INSERTION = 23;
+        DISRUPTIVE_INFRAME_INSERTION = 24;
+        INFRAME_DELETION = 25;
+        DISRUPTIVE_INFRAME_DELETION = 26;
+        FIVE_PRIME_UTR_TRUNCATION = 27;
+        THREE_PRIME_UTR_TRUNCATION = 28;
+        _SMALLEST_MODERATE_IMPACT = 29;
+        SPLICE_REGION_VARIANT = 30;
+        STOP_RETAINED_VARIANT = 31;
+        INITIATOR_CODON_VARIANT = 32;
+        SYNONYMOUS_VARIANT = 33;
+        CODING_TRANSCRIPT_INTRON_VARIANT = 34;
+        FIVE_PRIME_UTR_PREMATURE_START_CODON_GAIN_VARIANT = 35;
+        FIVE_PRIME_UTR_EXON_VARIANT = 36;
+        THREE_PRIME_UTR_EXON_VARIANT = 37;
+        FIVE_PRIME_UTR_INTRON_VARIANT = 38;
+        THREE_PRIME_UTR_INTRON_VARIANT = 39;
+        NON_CODING_TRANSCRIPT_EXON_VARIANT = 40;
+        NON_CODING_TRANSCRIPT_INTRON_VARIANT = 41;
+        _SMALLEST_LOW_IMPACT = 42;
+        DIRECT_TANDEM_DUPLICATION = 43;
+        MOBILE_ELEMENT_DELETION = 44;
+        MOBILE_ELEMENT_INSERTION = 45;
+        CUSTOM = 46;
+        UPSTREAM_GENE_VARIANT = 47;
+        DOWNSTREAM_GENE_VARIANT = 48;
+        INTERGENIC_VARIANT = 49;
+        TFBS_ABLATION = 50;
+        TFBS_AMPLIFICATION = 51;
+        TF_BINDING_SITE_VARIANT = 52;
+        REGULATORY_REGION_VARIANT = 53;
+        REGULATORY_REGION_ABLATION = 54;
+        REGULATORY_REGION_AMPLIFICATION = 55;
+        CONSERVED_INTRON_VARIANT = 56;
+        INTRAGENIC_VARIANT = 57;
+        CONSERVED_INTERGENIC_VARIANT = 58;
+        STRUCTURAL_VARIANT = 59;
+        CODING_SEQUENCE_VARIANT = 60;
+        INTRON_VARIANT = 61;
+        EXON_VARIANT = 62;
+        SPLICING_VARIANT = 63;
+        MIRNA = 64;
+        GENE_VARIANT = 65;
+        CODING_TRANSCRIPT_VARIANT = 66;
+    }
+
     string alleleId = 1;
     ClinSig primaryInterpretation = 2;
     repeated ClinSig secondaryInterpretations = 3;
     string reviewStatus = 4;
     map<string, ClinSig> includedAlleles = 5;
+    VariantEffect variantEffect = 6;
+    string geneSymbol = 7;
 }

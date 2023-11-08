@@ -21,8 +21,11 @@
 package org.monarchinitiative.exomiser.core.model.pathogenicity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.deser.impl.ValueInjector;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import de.charite.compbio.jannovar.annotation.VariantEffect;
+import org.monarchinitiative.exomiser.core.model.Variant;
 
 import java.util.*;
 
@@ -59,6 +62,8 @@ public class ClinVarData {
 
     //https://www.ncbi.nlm.nih.gov/clinvar/?term=99222[alleleid]
     private final String alleleId;
+    private final String geneSymbol;
+    private final VariantEffect variantEffect;
     private final ClinSig primaryInterpretation;
     private final Set<ClinSig> secondaryInterpretations;
 
@@ -112,6 +117,8 @@ public class ClinVarData {
 
     private ClinVarData(Builder builder) {
         this.alleleId = builder.alleleId;
+        this.geneSymbol = builder.geneSymbol;
+        this.variantEffect = builder.variantEffect;
         this.primaryInterpretation = builder.primaryInterpretation;
         this.secondaryInterpretations = Sets.immutableEnumSet(builder.secondaryInterpretations);
         this.reviewStatus = builder.reviewStatus.replace("_", " ");
@@ -129,6 +136,11 @@ public class ClinVarData {
 
     public String getAlleleId() {
         return alleleId;
+    }
+
+    public String getGeneSymbol() {return geneSymbol;}
+    public VariantEffect getVariantEffect() {
+        return variantEffect;
     }
 
     public ClinSig getPrimaryInterpretation() {
@@ -171,6 +183,10 @@ public class ClinVarData {
         return false;
     }
 
+    public boolean isPathOrLikelyPath() {
+        return primaryInterpretation == ClinSig.PATHOGENIC || primaryInterpretation == ClinSig.LIKELY_PATHOGENIC || primaryInterpretation == ClinSig.PATHOGENIC_OR_LIKELY_PATHOGENIC;
+    }
+
     /**
      * Returns the ClinVar star rating according to the criteria provided at
      * https://www.ncbi.nlm.nih.gov/clinvar/docs/review_status/#revstat_def
@@ -187,7 +203,7 @@ public class ClinVarData {
      * @since 13.0.0
      */
     public int starRating() {
-        switch (reviewStatus) {
+         switch (reviewStatus) {
             case "criteria provided, single submitter":
             case "criteria provided, conflicting interpretations":
                 return 1;
@@ -236,6 +252,9 @@ public class ClinVarData {
 
     public static class Builder {
         private String alleleId = "";
+        private String geneSymbol = "";
+        private VariantEffect variantEffect = VariantEffect.SEQUENCE_VARIANT;
+        private List<VariantEffect> variantEffectList = Collections.emptyList();
         private ClinSig primaryInterpretation = ClinSig.NOT_PROVIDED;
         private Set<ClinSig> secondaryInterpretations = EnumSet.noneOf(ClinSig.class);
 
@@ -248,6 +267,22 @@ public class ClinVarData {
             return this;
         }
 
+        public Builder geneSymbol(String geneSymbol) {
+            Objects.requireNonNull(geneSymbol);
+            this.geneSymbol = geneSymbol;
+            return this;
+        }
+
+        public Builder variantEffect(VariantEffect variantEffect) {
+            Objects.requireNonNull(variantEffect);
+            this.variantEffect = variantEffect;
+            return this;
+        }
+        public Builder variantEffect(List<VariantEffect> variantEffect) {
+            Objects.requireNonNull(variantEffect);
+            this.variantEffectList = variantEffect;
+            return this;
+        }
         public Builder primaryInterpretation(ClinSig primaryInterpretation) {
             Objects.requireNonNull(primaryInterpretation);
             this.primaryInterpretation = primaryInterpretation;

@@ -24,13 +24,11 @@ package org.monarchinitiative.exomiser.core.genome;
 import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.monarchinitiative.exomiser.core.genome.dao.*;
 import org.monarchinitiative.exomiser.core.model.Variant;
+import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.frequency.Frequency;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencySource;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicityScore;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.PathogenicitySource;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.*;
 import org.monarchinitiative.svart.GenomicInterval;
 import org.monarchinitiative.svart.GenomicVariant;
 import org.slf4j.Logger;
@@ -68,6 +66,8 @@ public class VariantDataServiceImpl implements VariantDataService {
     private final FrequencyDao svFrequencyDao;
     private final PathogenicityDao svPathogenicityDao;
 
+    private final GeneStatsDao geneStatsDao;
+
     private VariantDataServiceImpl(Builder builder) {
 
         this.whiteList = Objects.requireNonNull(builder.variantWhiteList);
@@ -75,6 +75,7 @@ public class VariantDataServiceImpl implements VariantDataService {
         this.defaultFrequencyDao = Objects.requireNonNull(builder.defaultFrequencyDao, "defaultFrequencyDao required!");
         this.defaultPathogenicityDao = Objects.requireNonNull(builder.defaultPathogenicityDao, "defaultPathogenicityDao required!");
         this.clinVarDao = Objects.requireNonNull(builder.clinVarDao, "clinVarDao required!");
+        this.geneStatsDao = Objects.requireNonNull(builder.geneStatsDao, "clinVarDao required!");
 
         this.localFrequencyDao = builder.localFrequencyDao;
         this.caddDao = builder.caddDao;
@@ -198,6 +199,11 @@ public class VariantDataServiceImpl implements VariantDataService {
         return clinVarDao.findClinVarDataOverlappingGenomicInterval(genomicInterval);
     }
 
+    @Override
+    public ClinVarGeneStats getClinVarGeneStats(String geneSymbol) {
+        return clinVarDao.getClinVarGeneStats(geneSymbol);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -207,6 +213,7 @@ public class VariantDataServiceImpl implements VariantDataService {
         private VariantWhiteList variantWhiteList = InMemoryVariantWhiteList.empty();
 
         private ClinVarDao clinVarDao;
+        private GeneStatsDao geneStatsDao;
 
         private FrequencyDao defaultFrequencyDao;
         private PathogenicityDao defaultPathogenicityDao;
@@ -227,6 +234,10 @@ public class VariantDataServiceImpl implements VariantDataService {
 
         public Builder clinVarDao(ClinVarDao clinVarDao) {
             this.clinVarDao = clinVarDao;
+            return this;
+        }
+        public Builder geneStatsDao(GeneStatsDao geneStatsDao) {
+            this.geneStatsDao = geneStatsDao;
             return this;
         }
 

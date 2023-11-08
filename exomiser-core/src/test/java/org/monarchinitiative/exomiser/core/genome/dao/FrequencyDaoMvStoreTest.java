@@ -76,6 +76,7 @@ public class FrequencyDaoMvStoreTest extends AllelePropertiesDaoAdapterTest {
         AlleleProperties properties = AlleleProperties.newBuilder().setRsId("rs54321").build();
         FrequencyDao instance = newInstanceWithData(ImmutableMap.of(key, properties));
         assertThat(instance.getFrequencyData(variant), equalTo(FrequencyData.of("rs54321")));
+        System.out.println(FrequencyData.of("rs54321"));
     }
 
     @Test

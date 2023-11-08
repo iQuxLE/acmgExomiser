@@ -35,5 +35,4 @@ class AllelePropertiesDaoAdapterTest {
         AllelePropertiesDaoMvStore allelePropertiesDao = new AllelePropertiesDaoMvStore(mvStore);
         return new AllelePropertiesDaoAdapter(allelePropertiesDao);
     }
-
 }

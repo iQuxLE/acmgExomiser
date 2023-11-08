@@ -25,7 +25,8 @@ import com.google.common.collect.ImmutableSet;
 /**
  * @author Jules Jacobsen <j.jacobsen@qmul.ac.uk>
  */
-public class GnomadGenomeAlleleParser extends ExacAlleleParser {
+public class
+GnomadGenomeAlleleParser extends ExacAlleleParser {
 
     public GnomadGenomeAlleleParser() {
         // See header file for gnomAD genomes data - we're keeping all but the AC0 fails

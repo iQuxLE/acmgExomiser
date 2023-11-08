@@ -1,5 +1,6 @@
 package org.monarchinitiative.exomiser.core.genome.dao;
 
+import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +12,14 @@ import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
 import org.monarchinitiative.exomiser.core.model.Variant;
 import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStats;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
+import org.springframework.aot.generate.FileSystemGeneratedFiles;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -127,6 +131,8 @@ class ClinVarDaoMvStoreTest {
 
     private GenomeAssembly genomeAssembly;
     private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
+    private MVMap<String, ClinVarGeneStats> clinVarGeneStatsMap;
+
     private MVStore mvStore;
 
     @BeforeEach
@@ -134,6 +140,7 @@ class ClinVarDaoMvStoreTest {
         genomeAssembly = GenomeAssembly.HG19;
         mvStore = newMvStore();
         clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
+        clinVarGeneStatsMap = MvStoreUtil.openGeneStatsMVMap(mvStore);
 
     }
 
@@ -333,8 +340,8 @@ class ClinVarDaoMvStoreTest {
         ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
 
         var result  = clinVarDao.findClinVarDataOverlappingGenomicInterval(variantEvaluation.withPadding(2,2));
-        assertThat(result.isEmpty(), is(true));
-        assertThat(result.size(), is(0));
+        assertThat(result.isEmpty(), is(false));
+        assertThat(result.size(), is(2));
 
     }
 
@@ -363,5 +370,70 @@ class ClinVarDaoMvStoreTest {
 
             assertThat(instance.getClinVarData(nonClinVarVariant), equalTo(ClinVarData.empty()));
         }
+    }
+
+    @Test
+    public void testGetClinVarGeneStats() {
+//        clinVarMap.put(positionStartMinus1, AlleleProto.ClinVar.newBuilder()
+//                .setGeneSymbol("BRCA1")
+//                .setVariantEffect(AlleleProto.ClinVar.VariantEffect.MISSENSE_VARIANT)
+//                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+//                .build());
+        clinVarGeneStatsMap.put("BRCA1", new ClinVarGeneStats("BRCA1", Map.of(VariantEffect.MISSENSE_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 9, ClinVarData.ClinSig.BENIGN, 1))));
+
+
+        clinVarMap.put(positionEndPlus1, AlleleProto.ClinVar.newBuilder()
+                .setGeneSymbol("BRCA1")
+                .setVariantEffect(AlleleProto.ClinVar.VariantEffect.MISSENSE_VARIANT)
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                .build());
+
+        clinVarMap.put(positionExactlyMatches, AlleleProto.ClinVar.newBuilder()
+                .setGeneSymbol("FGFR2")
+                .setVariantEffect(AlleleProto.ClinVar.VariantEffect.FRAMESHIFT_VARIANT)
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
+                .build());
+
+        clinVarMap.put(positionEndPlus3, AlleleProto.ClinVar.newBuilder()
+                .setGeneSymbol("FGFR2")
+                .setVariantEffect(AlleleProto.ClinVar.VariantEffect.FRAMESHIFT_VARIANT)
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.LIKELY_BENIGN)
+                .build());
+
+        clinVarMap.put(positionStartMinus1, AlleleProto.ClinVar.newBuilder()
+                .setGeneSymbol("FGFR2")
+                .setVariantEffect(AlleleProto.ClinVar.VariantEffect.FRAMESHIFT_VARIANT)
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.LIKELY_BENIGN)
+                .build());
+
+        clinVarMap.put(positionStartMinus2, AlleleProto.ClinVar.newBuilder()
+                .setGeneSymbol("FGFR2")
+                .setVariantEffect(AlleleProto.ClinVar.VariantEffect.NON_CODING_TRANSCRIPT_EXON_VARIANT)
+                .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.BENIGN)
+                .build());
+
+        ClinVarDaoMvStore clinVarDao = new ClinVarDaoMvStore(mvStore, genomeAssembly);
+
+        ClinVarGeneStats geneStats = clinVarDao.getClinVarGeneStats("BRCA1");
+        System.out.println(geneStats);
+//        assertThat(geneStats.size(), is(1));
+//        assertThat(geneStats.containsKey(VariantEffect.MISSENSE_VARIANT), is(true));
+
+//        ClinVarGeneStats clinVarGeneStats = geneStats.
+//        assertThat(clinVarGeneStats.getGeneSymbol(), is("BRCA1"));
+//        assertThat(clinVarGeneStats.getInnerMap().size(), is(1));
+//        assertThat(clinVarGeneStats.getClinSigMap(VariantEffect.MISSENSE_VARIANT).get(ClinVarData.ClinSig.PATHOGENIC), is(2));
+
+//        geneStats = clinVarDao.getClinVarGeneStats("BRCA2");
+//        assertThat(geneStats.size(), is(1));
+//        assertThat(geneStats.containsKey(VariantEffect.NON_CODING_TRANSCRIPT_EXON_VARIANT), is(true));
+//
+//        clinVarGeneStats = geneStats.get(VariantEffect.NON_CODING_TRANSCRIPT_EXON_VARIANT);
+//        assertThat(clinVarGeneStats.getGeneSymbol(), is("BRCA2"));
+//        assertThat(clinVarGeneStats.getInnerMap().size(), is(1));
+//        assertThat(clinVarGeneStats.getClinSigMap(VariantEffect.NON_CODING_TRANSCRIPT_EXON_VARIANT).get(ClinVarData.ClinSig.BENIGN), is(1));
+
+        var gstats = clinVarDao.getClinVarGeneStats("FGFR2");
+        System.out.println(gstats);
     }
 }

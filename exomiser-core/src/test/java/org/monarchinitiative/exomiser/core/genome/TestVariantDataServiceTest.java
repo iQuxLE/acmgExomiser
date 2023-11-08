@@ -1,5 +1,6 @@
 package org.monarchinitiative.exomiser.core.genome;
 
+import de.charite.compbio.jannovar.annotation.VariantEffect;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,11 +9,13 @@ import org.monarchinitiative.exomiser.core.genome.dao.serialisers.MvStoreUtil;
 import org.monarchinitiative.exomiser.core.model.AlleleProtoAdaptor;
 import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
+import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStats;
 import org.monarchinitiative.exomiser.core.proto.AlleleProto;
 import org.monarchinitiative.svart.*;
 
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,26 +50,6 @@ class TestVariantDataServiceTest {
             .setRef("A")
             .build();
 
-
-    private MVMap<AlleleProto.AlleleKey, AlleleProto.ClinVar> clinVarMap;
-    private MVStore mvStore;
-
-
-    private MVStore newMvStore() {
-        return new MVStore.Builder().compress().open();
-    }
-
-//    private static ClinVarData getClinVarDataPrimaryInterpretationFromAlleleProtoClinVar(AlleleProto.ClinVar clinVar){
-//        ClinVarData.ClinSig primaryInterpretation = AlleleProtoAdaptor.fromClinVarPrototoClinSig1(clinVar.getPrimaryInterpretation());
-//        return ClinVarData.builder().primaryInterpretation(primaryInterpretation).build();
-//
-//    }
-
-    @BeforeEach
-    public void setUp() {
-        mvStore = newMvStore();
-        clinVarMap = MvStoreUtil.openClinVarMVMap(mvStore);
-    }
 
     private static GenomicVariant getGenomicVariantFromProtoAlleleKey(AlleleProto.AlleleKey alleleKey, GenomeAssembly genomeAssembly){
         return GenomicVariant.builder().variant(genomeAssembly.getContigById(alleleKey.getChr()), Strand.POSITIVE,
@@ -117,6 +100,15 @@ class TestVariantDataServiceTest {
     }
 
     @Test
+    public void testGeneStatsMap() {
+        ClinVarGeneStats expectedMap = new ClinVarGeneStats("Test", Map.of(VariantEffect.MISSENSE_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 12, ClinVarData.ClinSig.BENIGN, 2)));
+        TestVariantDataService service = TestVariantDataService.builder()
+                .put("Test", expectedMap)
+                .build();
+        assertThat(service.getClinVarGeneStats("Test"), equalTo(expectedMap));
+    }
+
+    @Test
     public void testClinVarDaoMvStoreViaVariantDataService() {
         AlleleProto.ClinVar clinVar1 = AlleleProto.ClinVar.newBuilder()
                 .setPrimaryInterpretation(AlleleProto.ClinVar.ClinSig.PATHOGENIC)
@@ -135,8 +127,6 @@ class TestVariantDataServiceTest {
                 .build();
 
         TestVariantDataService service = TestVariantDataService.builder()
-                .setMVStore(mvStore)
-                .setGenomeAssembly(GenomeAssembly.HG19)
                 .put(positionEndPlus1, clinVar1)
                 .put(positionStartMinus1, clinVar2)
                 .put(positionPlus2, clinVar3)

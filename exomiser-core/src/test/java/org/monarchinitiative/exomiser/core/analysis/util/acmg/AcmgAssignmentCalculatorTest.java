@@ -62,7 +62,6 @@ class AcmgAssignmentCalculatorTest {
 
     private TestVariantDataService initializeVariantDataservice() {
         TestVariantDataService.Builder builder = TestVariantDataService.builder()
-                .setMVStore(mvStore)
                 .setGenomeAssembly(GenomeAssembly.HG19);
         return builder.build();
     }
