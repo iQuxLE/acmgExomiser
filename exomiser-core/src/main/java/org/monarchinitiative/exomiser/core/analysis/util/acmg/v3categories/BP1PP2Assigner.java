@@ -7,7 +7,6 @@ import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStats;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.BP1;
@@ -43,24 +42,20 @@ public class BP1PP2Assigner {
          */
         // define Thresholds
         double pathogenicMissenseThreshold = 0.808;
-        double ratioPathMissenseVariantsOverNonVus = calculatePercentagePathogenicVariantsForEffect(clinVarGeneStats, VariantEffect.MISSENSE_VARIANT);
+        double ratioPathMissenseVariantsOverNonVus = calculateRatioPathogenicMissenseToTruncatingVariants(clinVarGeneStats);
         return ratioPathMissenseVariantsOverNonVus > pathogenicMissenseThreshold;
     }
 
-    private double calculatePercentagePathogenicVariantsForEffect(ClinVarGeneStats clinVarGeneStatsMap, VariantEffect variantEffect){
-        ClinVarGeneStats geneStats = clinVarGeneStatsMap.getVariantEffects().contains(variantEffect) ? clinVarGeneStatsMap : null;
+    private double calculateRatioPathogenicMissenseToTruncatingVariants(ClinVarGeneStats clinVarGeneStatsMap){
+        ClinVarGeneStats geneStats = clinVarGeneStatsMap.getVariantEffects().contains(VariantEffect.MISSENSE_VARIANT) ? clinVarGeneStatsMap : null;
         if ( geneStats == null) return 0;
-        Map<ClinVarData.ClinSig, Integer> clinSigMap = geneStats.getClinSigMap(variantEffect);
+        Map<ClinVarData.ClinSig, Integer> clinSigMap = geneStats.getClinSigMap(VariantEffect.MISSENSE_VARIANT);
         int pathogenicityCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.PATHOGENIC, 0);
-
-        // PP2 checks that the ratio of pathogenic missense variants over all non-VUS missense variants is greater than 0.808
         int likelyPathogenicCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.LIKELY_PATHOGENIC, 0);
         int total = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
         int vusCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
-
-        double everythingBesidesVus = total - vusCount;
-
-        return (pathogenicityCount + likelyPathogenicCount) / everythingBesidesVus;
+        double nonVusVariants = total - vusCount;
+        return (pathogenicityCount + likelyPathogenicCount) / nonVusVariants;
     }
 
     /*
@@ -69,7 +64,7 @@ BP1 "Missense variant in a gene for which primarily truncating variants are know
     public void assignBP1(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation) {
         String geneSymbol = variantEvaluation.getGeneSymbol();
         ClinVarGeneStats clinVarGeneStats = variantDataService.getClinVarGeneStats(geneSymbol);
-        if (truncatingVariantsAreKnownToCauseDisease(clinVarGeneStats)) {
+        if (truncatingVariantsAreKnownToCauseDisease(clinVarGeneStats) && calculateRatioBenignMissenseVariantsOverAllNonVus(clinVarGeneStats) > 0.569) {
             acmgEvidenceBuilder.add(BP1);
         }
     }
@@ -77,14 +72,31 @@ BP1 "Missense variant in a gene for which primarily truncating variants are know
     private boolean truncatingVariantsAreKnownToCauseDisease(ClinVarGeneStats clinVarGeneStats) {
         /*
         algorithm for determining if truncating variants are known to cause disease
+        --> BP1 conversely checks that the ratio of benign missense variants over all non-VUS missense variants is greater than 0.569.
         --> see percentage of truncating variants that are pathogenic in comparison to missense in this gene
-        BP1 conversely checks that the ratio of benign missense variants over all non-VUS missense variants is greater than 0.569.
-
+        -->> supporting BENIGN, so if we are in a GENE for which primarily truncating Variants are know to cause disease and are pathogenic, finding benign Missense
+        variants here is a supporting evidence for a benign variant
          */
+
+        // currently not checking if gene has primarily truncating variants
+        // would be a function like primarly truncating ? and do ratio of pathogenic truncating to pathogenic (all other) and then a default threshold of like 5x .
+
         double benignMissenseThreshold = 0.569;
-        double missenseVariantsPathogenicity = calculatePercentagePathogenicVariantsForEffect(clinVarGeneStats, VariantEffect.MISSENSE_VARIANT);
-        return true;
+        double ratioBenignMissenseVariantsOverAllNonVus = calculateRatioBenignMissenseVariantsOverAllNonVus(clinVarGeneStats);
+//        double ratioPathogenicTruncatingVariants = calculateRatioPathogenicTruncatingVariants(clinVarGeneStats);
+        return ratioBenignMissenseVariantsOverAllNonVus > benignMissenseThreshold ;
+    }
 
-
+    private double calculateRatioBenignMissenseVariantsOverAllNonVus(ClinVarGeneStats clinVarGeneStatsMap){
+        ClinVarGeneStats geneStats = clinVarGeneStatsMap.getVariantEffects().contains(VariantEffect.MISSENSE_VARIANT) ? clinVarGeneStatsMap : null;
+        if ( geneStats == null) return 0;
+        Map<ClinVarData.ClinSig, Integer> clinSigMap = geneStats.getClinSigMap(VariantEffect.MISSENSE_VARIANT);
+        int benignCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.BENIGN, 0);
+        // over all non vus missense bitte beachten
+        int likelyBenignCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.LIKELY_BENIGN, 0);
+        int total = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
+        int vusCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
+        double nonVusVariants = total - vusCount;
+        return (benignCount + likelyBenignCount) / nonVusVariants;
     }
 }
