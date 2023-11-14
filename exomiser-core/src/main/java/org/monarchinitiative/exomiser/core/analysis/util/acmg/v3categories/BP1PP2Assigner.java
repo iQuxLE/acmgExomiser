@@ -42,20 +42,21 @@ public class BP1PP2Assigner {
          */
         // define Thresholds
         double pathogenicMissenseThreshold = 0.808;
-        double ratioPathMissenseVariantsOverNonVus = calculateRatioPathogenicMissenseToTruncatingVariants(clinVarGeneStats);
-        return ratioPathMissenseVariantsOverNonVus > pathogenicMissenseThreshold;
+        double ratioPathMissenseVariantsOverNonVusMissense = calculateRatioPathogenicMissenseToTruncatingVariants(clinVarGeneStats);
+        return ratioPathMissenseVariantsOverNonVusMissense > pathogenicMissenseThreshold;
     }
 
     private double calculateRatioPathogenicMissenseToTruncatingVariants(ClinVarGeneStats clinVarGeneStatsMap){
         ClinVarGeneStats geneStats = clinVarGeneStatsMap.getVariantEffects().contains(VariantEffect.MISSENSE_VARIANT) ? clinVarGeneStatsMap : null;
         if ( geneStats == null) return 0;
+        // only be inside Missense
         Map<ClinVarData.ClinSig, Integer> clinSigMap = geneStats.getClinSigMap(VariantEffect.MISSENSE_VARIANT);
         int pathogenicityCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.PATHOGENIC, 0);
         int likelyPathogenicCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.LIKELY_PATHOGENIC, 0);
-        int total = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
-        int vusCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
-        double nonVusVariants = total - vusCount;
-        return (pathogenicityCount + likelyPathogenicCount) / nonVusVariants;
+        int totalMissense = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
+        int missenseVusCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
+        double nonVusMissenseVariants = totalMissense - missenseVusCount;
+        return (pathogenicityCount + likelyPathogenicCount) / nonVusMissenseVariants;
     }
 
     /*

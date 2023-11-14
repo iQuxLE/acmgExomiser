@@ -336,6 +336,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
     private void assignPS2(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation, ModeOfInheritance modeOfInheritance, List<VariantEvaluation> contributingVariants, boolean hasCompatibleDiseaseMatches, Individual proband) {
         if (modeOfInheritance.isDominant() && hasCompatibleDiseaseMatches && contributingVariants.contains(variantEvaluation)) {
             List<Individual> ancestors = pedigree.anscestorsOf(proband);
+
+            var x = variantEvaluation.getFrequencyData();
             boolean noFamilyHistoryOfDisease = true;
             boolean noFamilyHistoryOfAllele = true;
             if (ancestors.size() >= 2) {

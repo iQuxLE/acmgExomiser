@@ -53,6 +53,12 @@ public class SvFrequency implements OutputLine, Comparable<SvFrequency> {
         this.alleleNum = alleleNum;
     }
 
+    public int getAlleleCount() {
+        return alleleCount;
+    }
+    public int getAlleleNum() {
+        return alleleNum;
+    }
     public int getChr() {
         return chr;
     }
