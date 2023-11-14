@@ -83,9 +83,8 @@ BP1 "Missense variant in a gene for which primarily truncating variants are know
         // would be a function like primarly truncating ? and do ratio of pathogenic truncating to pathogenic (all other) and then a default threshold of like 5x .
 
         double benignMissenseThreshold = 0.569;
-        double ratioBenignMissenseVariantsOverAllNonVus = calculateRatioBenignMissenseVariantsOverAllNonVus(clinVarGeneStats);
-//        double ratioPathogenicTruncatingVariants = calculateRatioPathogenicTruncatingVariants(clinVarGeneStats);
-        return ratioBenignMissenseVariantsOverAllNonVus > benignMissenseThreshold ;
+        double ratioBenignMissenseVariantsOverAllNonVusMissense = calculateRatioBenignMissenseVariantsOverAllNonVus(clinVarGeneStats);
+        return ratioBenignMissenseVariantsOverAllNonVusMissense > benignMissenseThreshold ;
     }
 
     private double calculateRatioBenignMissenseVariantsOverAllNonVus(ClinVarGeneStats clinVarGeneStatsMap){
@@ -95,9 +94,9 @@ BP1 "Missense variant in a gene for which primarily truncating variants are know
         int benignCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.BENIGN, 0);
         // over all non vus missense bitte beachten
         int likelyBenignCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.LIKELY_BENIGN, 0);
-        int total = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
-        int vusCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
-        double nonVusVariants = total - vusCount;
-        return (benignCount + likelyBenignCount) / nonVusVariants;
+        int totalMissense = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
+        int vusCountMissense = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
+        double nonVusMissenseVariants = totalMissense - vusCountMissense;
+        return (benignCount + likelyBenignCount) / nonVusMissenseVariants;
     }
 }
