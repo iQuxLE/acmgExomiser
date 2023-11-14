@@ -25,6 +25,25 @@ public record ClinVarGeneStats(String geneSymbol, Map<VariantEffect, Map<ClinVar
         return variantEffectCounts.getOrDefault(variantEffect, Map.of());
     }
 
+    public Map<ClinVarData.ClinSig, Integer> getMissenseData() {
+        return getClinSigMap(VariantEffect.MISSENSE_VARIANT);
+    }
+
+    public Map<ClinVarData.ClinSig, Integer> getTruncatingData() {
+        Set<VariantEffect> truncatingEffects = Set.of(VariantEffect.START_LOST, VariantEffect.STOP_GAINED, VariantEffect.FRAMESHIFT_TRUNCATION,  VariantEffect.SPLICE_ACCEPTOR_VARIANT, VariantEffect.SPLICE_DONOR_VARIANT);
+        return getClinSigMapForSet(truncatingEffects);
+    }
+
+    public Map<ClinVarData.ClinSig, Integer> getClinSigMapForSet(Set<VariantEffect> variantEffectSet) {
+        Map<ClinVarData.ClinSig, Integer> aggregatedData = new HashMap<>();
+        for (VariantEffect variantEffect : variantEffectSet) {
+            getClinSigMap(variantEffect).forEach((clinSig, count) ->
+                    aggregatedData.merge(clinSig, count, Integer::sum)
+            );
+        }
+        return aggregatedData;
+    }
+
 
     public static ClinVarGeneStats empty(){
         return EMPTY_DATA;
@@ -34,7 +53,7 @@ public record ClinVarGeneStats(String geneSymbol, Map<VariantEffect, Map<ClinVar
     public String toString() {
         return "ClinVarGeneStats{" +
                 "geneSymbol='" + geneSymbol + '\'' +
-                ", innerMap=" + variantEffectCounts +
+                ", effectMap=" + variantEffectCounts +
                 '}';
     }
 
