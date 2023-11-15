@@ -12,8 +12,13 @@ public class BS1BS2Assigner {
 
     private final VariantDataService variantDataService;
 
-    public BS1BS2Assigner(VariantDataService variantDataService){
+    private final float CLINGEN_MITO_THRESHOLD = 0.005f;
+    private final float DEFAULT_THRESHOLD_RARE_DISEASE = 0.015f;
 
+    private final float BENIGN_CUT_OFF_FREQUENCY;
+
+    public BS1BS2Assigner(VariantDataService variantDataService){
+        this.BENIGN_CUT_OFF_FREQUENCY = variantDataService.calculateGeneSpecificBenignCutOffFrequency();
         this.variantDataService = variantDataService;
     }
 
@@ -72,9 +77,9 @@ public class BS1BS2Assigner {
         if (knownVariantsCount < 4) {
             return DEFAULT_THRESHOLD_RARE_DISEASE;
         } else {
-            // Here we would normally calculate a gene-specific benign threshold
+            // Here we would normally calculate a gene-specific benign threshold --> cutOFF freqency Gene specific
             // This is a placeholder for the actual implementation which would require additional data
-            return BENIGN_THRESHOLD;
+            return BENIGN_CUT_OFF_FREQUENCY; // gene specific
         }
     }
 }

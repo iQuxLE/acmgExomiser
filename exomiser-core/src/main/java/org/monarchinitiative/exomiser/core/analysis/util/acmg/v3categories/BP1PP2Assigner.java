@@ -111,7 +111,7 @@ BP1 "Missense variant in a gene for which primarily truncating variants are know
          */
     // define Thresholds
 
-    private double calculateMissenseVariantRatio(ClinVarGeneStats clinVarGeneStatsMap, ClinVarData.ClinSig clinSig) {
+    private double calculateMissenseVariantRatioOverNonVusMissense(ClinVarGeneStats clinVarGeneStatsMap, ClinVarData.ClinSig clinSig) {
         if (!clinVarGeneStatsMap.getVariantEffects().contains(VariantEffect.MISSENSE_VARIANT)) {
             return 0;
         }
@@ -141,9 +141,9 @@ BP1 "Missense variant in a gene for which primarily truncating variants are know
         }
 
         // Calculate the pathogenic ratio for missense variants
-        double pathogenicRatio = calculateMissenseVariantRatio(clinVarGeneStats, ClinVarData.ClinSig.PATHOGENIC);
+        double pathogenicRatio = calculateMissenseVariantRatioOverNonVusMissense(clinVarGeneStats, ClinVarData.ClinSig.PATHOGENIC);
         // Calculate the benign ratio for missense variants
-        double benignRatio = calculateMissenseVariantRatio(clinVarGeneStats, ClinVarData.ClinSig.BENIGN);
+        double benignRatio = calculateMissenseVariantRatioOverNonVusMissense(clinVarGeneStats, ClinVarData.ClinSig.BENIGN);
 
         // Check for PP2: Pathogenic missense variant ratio
         if (pathogenicRatio > missenseIsAcommonMechanismOfDisease) {

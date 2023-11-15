@@ -41,6 +41,7 @@ public class BP7Assigner {
     public boolean nucleotideNotHighlyConserved(VariantEvaluation variantEvaluation){
         // check for phylopScore
         // add to vcf when processing ?
+        variantDataService.getPhyloScore(variantEvaluation);
 //        int phyloScore = variantEvaluation.getPhyloScore(); //SNPiff
 
         //VARSOME:
