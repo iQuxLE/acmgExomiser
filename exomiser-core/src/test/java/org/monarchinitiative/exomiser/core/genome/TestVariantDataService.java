@@ -176,13 +176,17 @@ public class TestVariantDataService implements VariantDataService {
             return this;
         }
 
-        public Builder put(AlleleProto.AlleleKey AlleleKey, AlleleProto.ClinVar ClinVar){
-            this.clinVarMap.put(AlleleKey, ClinVar);
+        public Builder put(AlleleProto.AlleleKey alleleKey, AlleleProto.ClinVar clinVar){
+            if (alleleKey != null && clinVar != null) {
+                this.clinVarMap.put(alleleKey, clinVar);
+            }
             return this;
         }
 
         public Builder put(String geneSymbol, ClinVarGeneStats clinVarGeneStats) {
-            this.clinVarGeneStatsMap.put(geneSymbol, clinVarGeneStats);
+            if (geneSymbol != null && clinVarGeneStats != null) {
+                this.clinVarGeneStatsMap.put(geneSymbol, clinVarGeneStats);
+            }
             return this;
         }
 

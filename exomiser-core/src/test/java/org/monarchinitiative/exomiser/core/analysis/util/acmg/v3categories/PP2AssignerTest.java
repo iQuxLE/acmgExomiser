@@ -80,4 +80,21 @@ class PP2AssignerTest {
         assignerBelow.assign(acmgBuilderBelow, variantEvaluationBelow);
         assertThat(acmgBuilderBelow.contains(PP2), is(false));
     }
+
+    @Test
+    void assignWithNullGeneSymbolAndClinVarGeneStats() {
+        TestVariantDataService service = TestVariantDataService.builder()
+                .put("Test", null)
+                .build();
+        var assigner = new BP1PP2Assigner(service);
+        VariantEvaluation variantEvaluation = VariantEvaluation.builder()
+                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(123, 123), "T", "A")
+                .geneSymbol("Test")
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .build();
+        AcmgEvidence.Builder acmgBuilder = new AcmgEvidence.Builder();
+
+        assigner.assign(acmgBuilder, variantEvaluation);
+        assertThat(acmgBuilder.contains(PP2), is(false));
+    }
 }

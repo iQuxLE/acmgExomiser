@@ -66,4 +66,5 @@ public class PP2Assigner {
         System.out.println(ratio > missenseIsAcommonMechanismOfDisease);
         return ratio > missenseIsAcommonMechanismOfDisease;
     }
+
 }

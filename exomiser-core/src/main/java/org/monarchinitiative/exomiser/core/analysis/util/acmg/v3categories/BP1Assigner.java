@@ -41,6 +41,9 @@ public class BP1Assigner {
             return;
         }
         ClinVarGeneStats clinVarGeneStats = variantDataService.getClinVarGeneStats(geneSymbol);
+        if(clinVarGeneStats == null){
+            return;
+        }
         if (truncatingVariantsArePrimarilyDiseaseCausing(clinVarGeneStats) && calculateRatioBenignMissenseVariantsOverAllNonVusMissense(clinVarGeneStats, variantEffect) > benignMissenseThreshold) {
             acmgEvidenceBuilder.add(BP1);
         }

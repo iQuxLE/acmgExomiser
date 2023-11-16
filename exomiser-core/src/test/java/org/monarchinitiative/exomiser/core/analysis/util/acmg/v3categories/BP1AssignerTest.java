@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.BP1;
+import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.PP2;
 
 class BP1AssignerTest {
 
@@ -59,5 +60,39 @@ class BP1AssignerTest {
 
         assignerBP1Above.assignBP1(acmgBuilderBP1Above, variantEvaluationBP1Above);
         assertThat(acmgBuilderBP1Above.contains(BP1), is(true));
+    }
+    @Test
+    void assignMapOfFrameshiftShouldBeFalse() {
+        ClinVarGeneStats expectedMapNonsense = new ClinVarGeneStats("TestNonsense", Map.of(VariantEffect.FRAMESHIFT_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 10, ClinVarData.ClinSig.BENIGN, 1)));
+        TestVariantDataService serviceNonsense = TestVariantDataService.builder()
+                .put("TestNonsense", expectedMapNonsense)
+                .build();
+        var assignerNonsense = new BP1PP2Assigner(serviceNonsense);
+        VariantEvaluation variantEvaluationNonsense = VariantEvaluation.builder()
+                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(123, 123), "T", "A")
+                .geneSymbol("TestNonsense")
+                .variantEffect(VariantEffect.FRAMESHIFT_VARIANT)
+                .build();
+        AcmgEvidence.Builder acmgBuilderNonsense = new AcmgEvidence.Builder();
+
+        assignerNonsense.assign(acmgBuilderNonsense, variantEvaluationNonsense);
+        assertThat(acmgBuilderNonsense.contains(BP1), is(false));
+    }
+
+    @Test
+    void assignWithNullGeneSymbolAndClinVarGeneStats() {
+        TestVariantDataService service = TestVariantDataService.builder()
+                .put("Test", null)
+                .build();
+        var assigner = new BP1Assigner(service);
+        VariantEvaluation variantEvaluation = VariantEvaluation.builder()
+                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(123, 123), "T", "A")
+                .geneSymbol("Test")
+                .variantEffect(VariantEffect.MISSENSE_VARIANT)
+                .build();
+        AcmgEvidence.Builder acmgBuilder = new AcmgEvidence.Builder();
+
+        assigner.assignBP1(acmgBuilder, variantEvaluation);
+        assertThat(acmgBuilder.contains(BP1), is(false));
     }
 }
