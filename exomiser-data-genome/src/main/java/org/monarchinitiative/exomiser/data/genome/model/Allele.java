@@ -20,12 +20,7 @@
 
 package org.monarchinitiative.exomiser.data.genome.model;
 
-import de.charite.compbio.jannovar.annotation.VariantEffect;
-import org.monarchinitiative.exomiser.core.analysis.util.acmg.GeneStatistics;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
-import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStatistics;
-
-import javax.annotation.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -39,11 +34,6 @@ public class Allele implements Comparable<Allele> {
     private final int pos;
     private final String ref;
     private final String alt;
-
-    private final ClinVarGeneStatistics clinVarGeneStatistics = null;
-//    private final String geneSymbol;
-//    private final VariantEffect molecularConsequence;
-
     private String rsId = "";
     private ClinVarData clinVarData = null;
     private final Map<AlleleProperty, Float> values = new EnumMap<>(AlleleProperty.class);
@@ -53,8 +43,6 @@ public class Allele implements Comparable<Allele> {
         this.pos = pos;
         this.ref = ref;
         this.alt = alt;
-//        this.geneSymbol = geneSymbol;
-//        this.molecularConsequence = molecularConsequence;
     }
 
     public int getChr() {
@@ -87,10 +75,6 @@ public class Allele implements Comparable<Allele> {
 
     public ClinVarData getClinVarData() {
         return this.clinVarData;
-    }
-
-    public ClinVarGeneStatistics getGeneStatistics(){
-        return this.clinVarGeneStatistics;
     }
 
     public void setClinVarData(ClinVarData clinVarData) {

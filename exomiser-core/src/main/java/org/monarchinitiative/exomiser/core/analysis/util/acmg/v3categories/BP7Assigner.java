@@ -30,7 +30,7 @@ public class BP7Assigner {
     //We use the scSNV database and MaxEntScan for splice-site prediction in rules for rules BP7 and PP3.
     // This score is limited to single-nucleotide variants only. A variant will be predicted splicing if
     // 'ADA Boost Splicing' threshold is greater than 0.958.
-    public void assign(AcmgEvidence.Builder acmgEvidence, VariantEvaluation variantEvaluation){
+    public void assign(AcmgEvidence.Builder acmgEvidence, VariantEvaluation variantEvaluation) {
         // Jannovar annotates with variantEffect.splice_Acceptor or splice_donor, so when its synonymous, cant be something else
         VariantEffect variantEffect = variantEvaluation.getVariantEffect();
         if (variantEffect == VariantEffect.SYNONYMOUS_VARIANT && nucleotideNotHighlyConserved(variantEvaluation)) {
@@ -38,10 +38,16 @@ public class BP7Assigner {
         }
     }
 
-    public boolean nucleotideNotHighlyConserved(VariantEvaluation variantEvaluation){
+    public boolean nucleotideNotHighlyConserved(VariantEvaluation variantEvaluation) {
         // check for phylopScore
         // add to vcf when processing ?
-        variantDataService.getPhyloScore(variantEvaluation);
+
+        return true;
+
+
+//        variantDataService.getPhyloScore(variantEvaluation);
+
+
 //        int phyloScore = variantEvaluation.getPhyloScore(); //SNPiff
 
         //VARSOME:
@@ -57,5 +63,6 @@ public class BP7Assigner {
         //Supporting Benign: if the score is less than 3.58
         //Supporting Pathogenic: if the score is greater than 7.52,
         //Moderate Pathogenic: if the score is greater than 9.88.
+
     }
 }

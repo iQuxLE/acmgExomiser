@@ -66,7 +66,7 @@ public class VariantDataServiceImpl implements VariantDataService {
     private final FrequencyDao svFrequencyDao;
     private final PathogenicityDao svPathogenicityDao;
 
-    private final GeneStatsDao geneStatsDao;
+//    private final GeneStatsDao geneStatsDao;
 
     private VariantDataServiceImpl(Builder builder) {
 
@@ -75,7 +75,7 @@ public class VariantDataServiceImpl implements VariantDataService {
         this.defaultFrequencyDao = Objects.requireNonNull(builder.defaultFrequencyDao, "defaultFrequencyDao required!");
         this.defaultPathogenicityDao = Objects.requireNonNull(builder.defaultPathogenicityDao, "defaultPathogenicityDao required!");
         this.clinVarDao = Objects.requireNonNull(builder.clinVarDao, "clinVarDao required!");
-        this.geneStatsDao = Objects.requireNonNull(builder.geneStatsDao, "clinVarDao required!");
+//        this.geneStatsDao = Objects.requireNonNull(builder.geneStatsDao, "geneStatsDao required!");
 
         this.localFrequencyDao = builder.localFrequencyDao;
         this.caddDao = builder.caddDao;

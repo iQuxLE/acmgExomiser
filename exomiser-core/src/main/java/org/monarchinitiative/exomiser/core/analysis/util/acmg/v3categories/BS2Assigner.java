@@ -27,7 +27,8 @@ public class BS2Assigner {
         // method NOT IMPLEMENTED yet (mauybe with alleleKey information ?
         // needs AlleleCount information (is in SvFrequency)
 //        svFrequencyDao.getFrequencyData(variantEvaluation);
-        int alleleCount = variantDataService.getAlleleCount(variantEvaluation.getVariant());
+//        int alleleCount = variantDataService.getAlleleCount(variantEvaluation.getVariant());
+        int alleleCount  = 2;
 
         switch (modeOfInheritance) {
             case AUTOSOMAL_RECESSIVE:

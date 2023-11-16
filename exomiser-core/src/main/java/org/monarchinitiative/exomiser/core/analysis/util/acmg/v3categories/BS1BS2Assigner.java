@@ -6,6 +6,9 @@ import org.monarchinitiative.exomiser.core.genome.VariantDataService;
 import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.frequency.FrequencyData;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.BS1;
 
 public class BS1BS2Assigner {
@@ -18,7 +21,8 @@ public class BS1BS2Assigner {
     private final float BENIGN_CUT_OFF_FREQUENCY;
 
     public BS1BS2Assigner(VariantDataService variantDataService){
-        this.BENIGN_CUT_OFF_FREQUENCY = variantDataService.calculateGeneSpecificBenignCutOffFrequency();
+        this.BENIGN_CUT_OFF_FREQUENCY = 1;
+//                variantDataService.calculateGeneSpecificBenignCutOffFrequency();
         this.variantDataService = variantDataService;
     }
 
@@ -71,7 +75,13 @@ public class BS1BS2Assigner {
 
     private float getBenignFrequencyThreshold(VariantDataService variantDataService, VariantEvaluation variantEvaluation) {
         // Get the count of known variants for the gene (use geneSymbol)
-        int knownVariantsCount = variantDataService.getKnownVariantsCount(variantEvaluation.getGeneSymbol());
+        List<Double> benignFrequencies = Arrays.asList(0.0, 0.2);
+        List<Double> pathogenicFrequencies = Arrays.asList(0.01, 0.02);
+        BenignCutOffFrequency cutoffCalculator = new BenignCutOffFrequency(benignFrequencies, pathogenicFrequencies);
+        double cutoff = cutoffCalculator.calculateCutoffFrequency();
+
+//        int knownVariantsCount = variantDataService.getKnownVariantsCount(variantEvaluation.getGeneSymbol());
+        int knownVariantsCount = 10;
 
         // Use default threshold if too few known variants
         if (knownVariantsCount < 4) {
@@ -79,9 +89,10 @@ public class BS1BS2Assigner {
         } else {
             // Here we would normally calculate a gene-specific benign threshold --> cutOFF freqency Gene specific
             // This is a placeholder for the actual implementation which would require additional data
-            return BENIGN_CUT_OFF_FREQUENCY; // gene specific
+//            return new BENIGN_CUT_OFF_FREQUENCY; // gene specific
+             return (float) cutoff;
         }
     }
 }
 
-}
+

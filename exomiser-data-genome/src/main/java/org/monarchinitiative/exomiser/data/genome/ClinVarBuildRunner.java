@@ -54,14 +54,7 @@ public class ClinVarBuildRunner {
             try(Stream<Allele> alleleStream = clinVarAlleleResource.parseResource()) {
                 alleleStream
                         .forEach(allele -> {
-                            // for each alleleAnnotate to get geneSymbol, geneID and molecularConsequence but build another geneStatsMap
                             var alleleKey = AlleleConverter.toAlleleKey(allele);
-                            var a = alleleKey.getChr();
-                            var b = alleleKey.getPosition();
-                            var c = alleleKey.getRef();
-                            var d = alleleKey.getAlt();
-                            List<VariantAnnotation> annotatedVariantList = variantAnnotator.annotate(VariantEvaluation.builder()
-                                    .variant(GenomeAssembly.HG19.getContigById(a), Strand.POSITIVE, Coordinates.oneBased(b, b), c, d).build());
                             var clinvarProto = AlleleConverter.toProtoClinVar(allele.getClinVarData());
                             clinVarMap.put(alleleKey, clinvarProto);
                         });
