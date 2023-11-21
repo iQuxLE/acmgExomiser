@@ -30,7 +30,7 @@ public record ClinVarGeneStats(String geneSymbol, Map<VariantEffect, Map<ClinVar
     }
 
     public Map<ClinVarData.ClinSig, Integer> getTruncatingData() {
-        Set<VariantEffect> truncatingEffects = Set.of(VariantEffect.START_LOST, VariantEffect.STOP_GAINED, VariantEffect.FRAMESHIFT_TRUNCATION,  VariantEffect.SPLICE_ACCEPTOR_VARIANT, VariantEffect.SPLICE_DONOR_VARIANT);
+        Set<VariantEffect> truncatingEffects = Set.of(VariantEffect.START_LOST, VariantEffect.STOP_GAINED, VariantEffect.FRAMESHIFT_TRUNCATION,  VariantEffect.SPLICE_ACCEPTOR_VARIANT, VariantEffect.SPLICE_DONOR_VARIANT, VariantEffect.FRAMESHIFT_VARIANT, VariantEffect.DISRUPTIVE_INFRAME_DELETION, VariantEffect.DISRUPTIVE_INFRAME_INSERTION, VariantEffect.INITIATOR_CODON_VARIANT, VariantEffect.INFRAME_INSERTION);
         return getClinSigMapForSet(truncatingEffects);
     }
 
@@ -76,12 +76,6 @@ public record ClinVarGeneStats(String geneSymbol, Map<VariantEffect, Map<ClinVar
             ClinVarData.ClinSig primaryInterpretation = clinVarData.getPrimaryInterpretation();
             Map<ClinVarData.ClinSig, Integer> clinSigMap = innerMap.computeIfAbsent(variantEffect, k -> new HashMap<>());
             clinSigMap.merge(primaryInterpretation, 1, Integer::sum);
-            return this;
-        }
-
-        public Builder addEntry(VariantEffect variantEffect, ClinVarData.ClinSig primaryInterpretation) {
-            innerMap.computeIfAbsent(variantEffect, k -> new HashMap<>())
-                    .merge(primaryInterpretation, 1, Integer::sum);
             return this;
         }
 
