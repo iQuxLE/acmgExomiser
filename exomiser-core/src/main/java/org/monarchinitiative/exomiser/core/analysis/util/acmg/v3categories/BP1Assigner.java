@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.BP1;
-import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.PP2;
 
 public class BP1Assigner {
     private static final Logger logger = LoggerFactory.getLogger(BP1Assigner.class);
@@ -55,7 +54,7 @@ public class BP1Assigner {
 
     private double calculateRatioBenignMissenseVariantsOverAllNonVusMissense(ClinVarGeneStats clinVarGeneStatsMap, VariantEffect variantEffect){
         if (variantEffect != VariantEffect.MISSENSE_VARIANT){
-            logger.info("" + "no missense");
+            logger.debug("" + "no missense");
             return 0;
         }
         Map<ClinVarData.ClinSig, Integer> clinSigMap = clinVarGeneStatsMap.getClinSigMap(VariantEffect.MISSENSE_VARIANT);
@@ -64,22 +63,19 @@ public class BP1Assigner {
         int totalMissense = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
         int vusCountMissense = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
         double nonVusMissenseVariants = totalMissense - vusCountMissense;
-        logger.info(""+ (benignCount + likelyBenignCount) / nonVusMissenseVariants);
+        logger.debug(""+ (benignCount + likelyBenignCount) / nonVusMissenseVariants);
         return (benignCount + likelyBenignCount) / nonVusMissenseVariants;
     }
 
     public boolean truncatingVariantsArePrimarilyDiseaseCausing(ClinVarGeneStats geneStats) {
-        logger.info("inside truncatingVaraitatsarePrimarirlyDiseaseCausing");
-        logger.info("" + geneStats.getVariantEffects());
+        logger.debug("" + geneStats.getVariantEffects());
         Map<ClinVarData.ClinSig, Integer> dataMap = geneStats.getTruncatingData();
-        logger.info("dataMap" + dataMap);
+        logger.debug("dataMap" + dataMap);
         int totalPathogenic = dataMap.getOrDefault(ClinVarData.ClinSig.PATHOGENIC, 0) + dataMap.getOrDefault(ClinVarData.ClinSig.LIKELY_PATHOGENIC, 0);
         int totalNonVus = dataMap.values().stream().mapToInt(Integer::intValue).sum() - dataMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
-        logger.info("totalNonVus: " + totalNonVus);
+        logger.debug("totalNonVus: " + totalNonVus);
         double ratio = totalNonVus == 0 ? 0 : (double) totalPathogenic / totalNonVus;
-        logger.info("ratio: " + ratio);
-        var u = ratio > truncatingVariantsArePrimarilyDiseaseCausing;
-        logger.info("ratio > truncatingVariantsArePrimarilyDiseaseCausing: " + u);
+        logger.debug("ratio: " + ratio);
         return ratio > truncatingVariantsArePrimarilyDiseaseCausing;
 
     }

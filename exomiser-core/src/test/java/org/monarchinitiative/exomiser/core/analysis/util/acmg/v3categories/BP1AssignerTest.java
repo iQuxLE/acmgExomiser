@@ -44,16 +44,13 @@ class BP1AssignerTest {
                 variantEffectMap.computeIfAbsent(variantEffect, k -> new HashMap<>()).put(clinSig, count);
             }
         }
-        System.out.println(geneSymbol);
-//        return new ClinVarGeneStats(geneSymbol, variantEffectMap);
         return variantEffectMap.isEmpty() ? null : new ClinVarGeneStats(geneSymbol, variantEffectMap);
     }
 
-
     @ParameterizedTest
     @CsvSource(value = {
-            "TestBP1BelowThreshold-STOP_GAINED, BENIGN, 80, PATHOGENIC, 10 | false", // is truncating variant but below Threshold
-            "TestBP1AboveThreshold-MISSENSE_VARIANT, PATHOGENIC, 1, BENIGN, 10; STOP_GAINED, PATHOGENIC, 125, BENIGN, 10 | true",
+            "TestBP1BelowThreshold-STOP_GAINED, BENIGN, 80, PATHOGENIC, 10 | false", // is truncating variant but below Threshold + no missense to check above non vus missense
+            "TestBP1AboveThreshold-MISSENSE_VARIANT, PATHOGENIC, 1, BENIGN, 10; STOP_GAINED, PATHOGENIC, 125, BENIGN, 10 | true", // stop gained is truncating and above threshold
             "TestNonsense-FRAMESHIFT_VARIANT, PATHOGENIC, 10, BENIGN, 1 | false",
             "null | false",
     }, delimiter = '|')
@@ -74,58 +71,7 @@ class BP1AssignerTest {
 
         assignerBP1Below.assignBP1(acmgBuilderBP1Below, variantEvaluationBP1Below);
         assertThat(acmgBuilderBP1Below.contains(BP1), is(expected));
-    }
-
-    @Test
-    void assignWithBP1ThresholdAboveEdgeCases() {
-        ClinVarGeneStats expectedMapBP1Above = new ClinVarGeneStats("TestBP1Above",
-                Map.of(VariantEffect.MISSENSE_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 1, ClinVarData.ClinSig.BENIGN, 10), VariantEffect.STOP_GAINED, Map.of(ClinVarData.ClinSig.PATHOGENIC, 125, ClinVarData.ClinSig.BENIGN, 10)));
-        TestVariantDataService serviceBP1Above = TestVariantDataService.builder()
-                .put("TestBP1Above", expectedMapBP1Above)
-                .build();
-        var assignerBP1Above = new BP1Assigner(serviceBP1Above);
-        VariantEvaluation variantEvaluationBP1Above = VariantEvaluation.builder()
-                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(123, 123), "T", "A")
-                .geneSymbol("TestBP1Above")
-                .variantEffect(VariantEffect.MISSENSE_VARIANT)
-                .build();
-        AcmgEvidence.Builder acmgBuilderBP1Above = new AcmgEvidence.Builder();
-
-        assignerBP1Above.assignBP1(acmgBuilderBP1Above, variantEvaluationBP1Above);
-        assertThat(acmgBuilderBP1Above.contains(BP1), is(true));
-    }
-    @Test
-    void assignMapOfFrameshiftShouldBeFalse() {
-        ClinVarGeneStats expectedMapNonsense = new ClinVarGeneStats("TestNonsense", Map.of(VariantEffect.FRAMESHIFT_VARIANT, Map.of(ClinVarData.ClinSig.PATHOGENIC, 10, ClinVarData.ClinSig.BENIGN, 1)));
-        TestVariantDataService serviceNonsense = TestVariantDataService.builder()
-                .put("TestNonsense", expectedMapNonsense)
-                .build();
-        var assignerNonsense = new BP1PP2Assigner(serviceNonsense);
-        VariantEvaluation variantEvaluationNonsense = VariantEvaluation.builder()
-                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(123, 123), "T", "A")
-                .geneSymbol("TestNonsense")
-                .variantEffect(VariantEffect.FRAMESHIFT_VARIANT)
-                .build();
-        AcmgEvidence.Builder acmgBuilderNonsense = new AcmgEvidence.Builder();
-
-        assignerNonsense.assign(acmgBuilderNonsense, variantEvaluationNonsense);
-        assertThat(acmgBuilderNonsense.contains(BP1), is(false));
-    }
-
-    @Test
-    void assignWithNullClinVarGeneStats() {
-        TestVariantDataService service = TestVariantDataService.builder()
-                .put("Test", null)
-                .build();
-        var assigner = new BP1Assigner(service);
-        VariantEvaluation variantEvaluation = VariantEvaluation.builder()
-                .variant(GenomeAssembly.HG19.getContigById(1), Strand.POSITIVE, Coordinates.oneBased(123, 123), "T", "A")
-                .geneSymbol("Test")
-                .variantEffect(VariantEffect.MISSENSE_VARIANT)
-                .build();
-        AcmgEvidence.Builder acmgBuilder = new AcmgEvidence.Builder();
-
-        assigner.assignBP1(acmgBuilder, variantEvaluation);
-        assertThat(acmgBuilder.contains(BP1), is(false));
+        // might want to adjust geneSymbol in Map and geneSymbol from put in TestVariantDataService to be the same, by now could be different
+        // or just only allow one assignment
     }
 }

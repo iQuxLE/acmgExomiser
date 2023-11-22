@@ -6,12 +6,15 @@ import org.monarchinitiative.exomiser.core.genome.VariantDataService;
 import org.monarchinitiative.exomiser.core.model.VariantEvaluation;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarData;
 import org.monarchinitiative.exomiser.core.model.pathogenicity.ClinVarGeneStats;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 import static org.monarchinitiative.exomiser.core.analysis.util.acmg.AcmgCriterion.PP2;
 
 public class PP2Assigner {
+    private static final Logger logger = LoggerFactory.getLogger(PP2Assigner.class);
 
     private final VariantDataService variantDataService;
 
@@ -36,7 +39,7 @@ public class PP2Assigner {
         String geneSymbol = variantEvaluation.getGeneSymbol();
         ClinVarGeneStats clinVarGeneStats = variantDataService.getClinVarGeneStats(geneSymbol);
         if (clinVarGeneStats == null){
-            System.out.println("geneStats is null");
+            logger.debug("geneStats is null");
             return;
         }
         if (missenseIsAcommonMechanismOfDisease(clinVarGeneStats, variantEvaluation.getVariantEffect()) && calculateRatioPathogenicMissenseOverAllNonVusMissense(clinVarGeneStats) > pathogenicMissenseThreshold) {
@@ -51,7 +54,7 @@ public class PP2Assigner {
         int totalMissense = clinSigMap.values().stream().mapToInt(Integer::intValue).sum();
         int missenseVusCount = clinSigMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
         double nonVusMissenseVariants = totalMissense - missenseVusCount;
-        System.out.println(""+(pathogenicityCount + likelyPathogenicCount) / nonVusMissenseVariants);
+        logger.debug(""+(pathogenicityCount + likelyPathogenicCount) / nonVusMissenseVariants);
         return (pathogenicityCount + likelyPathogenicCount) / nonVusMissenseVariants;
     }
 
@@ -63,7 +66,6 @@ public class PP2Assigner {
         int totalPathogenic = dataMap.getOrDefault(ClinVarData.ClinSig.PATHOGENIC, 0) + dataMap.getOrDefault(ClinVarData.ClinSig.LIKELY_PATHOGENIC, 0);
         int totalNonVus = dataMap.values().stream().mapToInt(Integer::intValue).sum() - dataMap.getOrDefault(ClinVarData.ClinSig.UNCERTAIN_SIGNIFICANCE, 0);
         double ratio = totalNonVus == 0 ? 0 : (double) totalPathogenic / totalNonVus;
-        System.out.println(ratio > missenseIsAcommonMechanismOfDisease);
         return ratio > missenseIsAcommonMechanismOfDisease;
     }
 
