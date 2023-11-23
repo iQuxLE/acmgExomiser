@@ -21,6 +21,15 @@ message AlleleProperties {
     int32 alleleCount = 4;
     int32 alleleNumber = 5;
     int32 homCount = 6;
+    SvFrequency frequency = 7;
+}
+
+message SvFrequency {
+    int32 chr = 1;
+    int32 start = 2;
+    int32 end = 3;
+    int32 alleleCount = 4;
+    int32 alleleNum = 5;
 }
 
 message ClinVar {
