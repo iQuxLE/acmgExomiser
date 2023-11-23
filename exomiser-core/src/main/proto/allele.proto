@@ -18,9 +18,9 @@ message AlleleProperties {
     map<string, float> properties = 2;
     //TODO: move to model or somewhere and then import here - this is also needed for output in results
     ClinVar clinVar = 3;
-//    int32 alleleCount = 4;
-//    int32 alleleNumber = 5;
-//    int32 hom = 6;
+    int32 alleleCount = 4;
+    int32 alleleNumber = 5;
+    int32 homCount = 6;
 }
 
 message ClinVar {

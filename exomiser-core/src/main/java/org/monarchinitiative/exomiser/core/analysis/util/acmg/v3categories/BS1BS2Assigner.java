@@ -44,14 +44,6 @@ public class BS1BS2Assigner {
     //
     //Rule BS1 will not trigger if there is strong pathogenic clinical evidence.
 
-    //BS2 - "Observed in a healthy adult individual for a recessive (homozygous), dominant (heterozygous), or X-linked
-    // (hemizygous) disorder, with full penetrance expected at an early age" - needs het/hom counts from gnomAD
-    // (these should be in the newer v14 variant store, but I need to double-check)\
-    //Varsome:
-    //We first determine the mode of inheritance of the gene, then compares the allele count (see allele frequency for quality checks) to the corresponding threshold:
-    //
-    //recessive or X-linked genes: allele count greater than 2,
-    //dominant genes: allele count greater than 5.
 
     public void assign(AcmgEvidence.Builder acmgEvidenceBuilder, VariantEvaluation variantEvaluation, ModeOfInheritance modeOfInheritance) {
         // Check if BA1 or PM2 have been triggered already, and if strong pathogenic evidence exists

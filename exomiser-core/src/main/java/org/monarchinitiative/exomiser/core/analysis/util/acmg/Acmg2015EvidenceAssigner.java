@@ -127,8 +127,8 @@ public class Acmg2015EvidenceAssigner implements AcmgEvidenceAssigner {
 
         // PP2 "Missense variant in a gene that has a low rate of benign missense variation and in which missense variants are a common mechanism of disease"
         // BP1 "Missense variant in a gene for which primarily truncating variants are known to cause disease"
-        BP1PP2Assigner bp1PP2Assigner = new BP1PP2Assigner(variantDataService);
-        bp1PP2Assigner.assign(acmgEvidenceBuilder, variantEvaluation);
+//        BP1PP2Assigner bp1PP2Assigner = new BP1PP2Assigner(variantDataService);
+//        bp1PP2Assigner.assign(acmgEvidenceBuilder, variantEvaluation);
 
         // PS1 "Same amino acid change as a previously established pathogenic variant regardless of nucleotide change"
         // Should NOT assign for PS1 for same base change. Unable to assign PS1 due to lack of AA change info in database
