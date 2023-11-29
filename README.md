@@ -1,4 +1,4 @@
-The Exomiser - A Tool to Annotate and Prioritize Exome Variants
+The Exomiser - A Tool to Annotate and Prioritize Exome Variant
 ===============================================================
 
 [![GitHub release](https://img.shields.io/github/release/exomiser/Exomiser.svg)](https://github.com/exomiser/Exomiser/releases)
